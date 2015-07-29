@@ -207,8 +207,8 @@ uint16_t SkyPointer_MicroStepper::microstep (uint16_t usteps, uint8_t dir) {
     }
     
     // Load values into PWM registers
-    MC -> setPWM(PWMApin, ocra);
-    MC -> setPWM(PWMBpin, ocrb);
+    MC -> setPWM(PWMApin, ocra*16);
+    MC -> setPWM(PWMBpin, ocrb*16);
     
     // Latch state for deciding on which coils to excite
     uint8_t latch_state = 0;
