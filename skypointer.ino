@@ -39,7 +39,7 @@ uint8_t usteps = 16;
 uint16_t totalMicrosteps = (uint16_t) (steps * usteps); // Needs 16 bit
 
 // Definition of the SerialCommand object, with delimiter ":"
-SerialCommand sCmd(":");
+SerialCommand sCmd;
 // Definition of the motor shield
 SkyPointer_MotorShield MS = SkyPointer_MotorShield ();
 // Motor 1 on port 1, 200 steps/rev
