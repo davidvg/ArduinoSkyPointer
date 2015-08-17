@@ -74,7 +74,7 @@ void SkyPointer_MotorShield::setPin(uint8_t pin, boolean value) {
 SkyPointer_MicroStepper::SkyPointer_MicroStepper (void) {
     target = 0;
     microstepsPerRev = 0;
-    steppernum = 0;
+    microsteppernum = 0;
     currMicrostep = 0;    // Current microstep
     currPos = 0;          // Current position in microsteps
 }
@@ -89,8 +89,8 @@ SkyPointer_MicroStepper *SkyPointer_MotorShield::getMicroStepper (uint16_t steps
     if (num > 2) return NULL;
     num--;  // Changes the number of the motor to the range [0, 1]
 
-    if (microsteppers[num].steppernum == 0) {
-        microsteppers[num].steppernum = num; // Number of the motor
+    if (microsteppers[num].microsteppernum == 0) {
+        microsteppers[num].microsteppernum = num; // Number of the motor
         microsteppers[num].microstepsPerRev = steps*MICROSTEPS; //number of microsteps per rev
                      // this could be changed to customize number of microsteps per step
         microsteppers[num].MC = this;

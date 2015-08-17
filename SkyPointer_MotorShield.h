@@ -22,10 +22,11 @@ TO-DO
 #include <Wire.h>
 #include "utility/Adafruit_PWMServoDriver.h"
 
-//#define MOTORDEBUG
-
 #define MICROSTEPS 16         // 8 or 16
 
+
+// REMOVE ???
+/*
 #define MOTOR1_A 2
 #define MOTOR1_B 3
 #define MOTOR2_A 1
@@ -34,56 +35,65 @@ TO-DO
 #define MOTOR4_B 6
 #define MOTOR3_A 5
 #define MOTOR3_B 7
+*/
 
+// REMOVE BRAKE AND RELEASE ???
 #define FORWARD 1
 #define BACKWARD 2
-#define BRAKE 3
-#define RELEASE 4
+//#define BRAKE 3
+//#define RELEASE 4
 
+// Not needed for the MicroStepper class.
+// Used only in the Stepper class
 #define SINGLE 1
 #define DOUBLE 2
 #define INTERLEAVE 3
 #define MICROSTEP 4
 
+/******************************************************************************/
+
+// Predefinition of the SkyPointer_MotorShield for its use in the Microstepper
 class SkyPointer_MotorShield;
-///////////////////////////////////////
+
+/******************************************************************************/
+
 // New class for Microstepper motor
 class SkyPointer_MicroStepper {
     public:
-        SkyPointer_MicroStepper (void);
-        friend class SkyPointer_MotorShield;
-        // Parameters
-        uint16_t target;
-        uint32_t usecPerMicrostep;
-        uint16_t currPos;
-        //uint32_t steppingcounter;   // Not needed
-        // Function members
-        uint16_t getPosition (); // Returns current position in microsteps
-        uint16_t microstep (uint16_t usteps, uint8_t dir);  // Rotates microsteps
-        void setSpeed (float);   // Calculates interval in microseconds
-                                    // from one call of microstep to the next
-        void release (void);        // Frees the motor
-        void setTarget (uint16_t);  // Sets the value of the target for the motor
-        boolean isTarget(void);     // Checks if currPos == target
-        // Debug
-        uint32_t getSpeed();
-        
-        
+        SkyPointer_MicroStepper (void); // Constructor for the class
+        friend class SkyPointer_MotorShield;   
+                 
+        uint16_t getPosition ();    // Returns current position of the motor
+        uint16_t target;            // Target position for the motor
+        void setTarget (uint16_t);  // Sets the value of the target for the motor   
+        boolean isTarget(void);     // Returns True if currPos == target
+        void setSpeed (float);      // Sets the speed of the motor ## TO-DO ##
+        uint32_t getSpeed();        // Returns the the speed of the motor in us
+
+        // Function for a rotation of one microstep in any direction
+        uint16_t microstep (uint16_t usteps, uint8_t dir);
+        // Removes voltage from the coils
+        void release (void);
+
     private:
-        // Parameters
-        uint8_t steppernum;
-        uint16_t microstepsPerRev; // 'Whole' steps per revolution
-        uint16_t currMicrostep;
-        // Function members
+        uint32_t usecPerMicrostep;  // Time interval between rotations to rotate
+                                    // at the desired speed
+        uint8_t microsteppernum;    // Stores the number of the motor [1, 2]
+        uint16_t microstepsPerRev;  // Number of steps per rev times microsteps
+                                    // per step   
+        uint16_t currMicrostep;     // Current microstep in the cycle of a step
+                                    // It's a value in [0, MICROSTEPS]
+        uint16_t currPos;           // Current position in the revolution
+        
+        // Variables for the PWM
         uint8_t PWMApin, AIN1pin, AIN2pin;
         uint8_t PWMBpin, BIN1pin, BIN2pin;
         
-        SkyPointer_MotorShield *MC;
-        
+        SkyPointer_MotorShield *MC;        
 };
 
-
-///////////////////////////////////////
+/******************************************************************************/
+//  TO-DO -- Make cleanup
 class SkyPointer_StepperMotor {
  public:
   SkyPointer_StepperMotor(void);
@@ -105,29 +115,35 @@ class SkyPointer_StepperMotor {
   uint8_t steppernum;
 };
 
-class SkyPointer_MotorShield
-{
-  public:
-    SkyPointer_MotorShield(uint8_t addr = 0x60);
+/******************************************************************************/
 
-    void begin(uint16_t freq = 1600);
-
-    void setPWM(uint8_t pin, uint16_t val);
-    void setPin(uint8_t pin, boolean val);
-
-    // Attach stepper motor in microstepper mode
-    SkyPointer_MicroStepper *getMicroStepper(uint16_t steps, uint8_t num);
-    // Attach stepper motor in normal mode
-    SkyPointer_StepperMotor *getStepper(uint16_t steps, uint8_t n);
- private:
-    uint8_t _addr;
-    uint16_t _freq;
-
-    SkyPointer_StepperMotor steppers[2];
-    // Added...
-    SkyPointer_MicroStepper microsteppers[2];
+class SkyPointer_MotorShield {
+    public:
+        // Constructor for the class
+        SkyPointer_MotorShield(uint8_t addr = 0x60);
+        
+        void begin(uint16_t freq = 1600);       // Initializes the shield
+        // Functions for setting PWM
+        void setPWM(uint8_t pin, uint16_t val);
+        void setPin(uint8_t pin, boolean val);
     
-    Adafruit_PWMServoDriver _pwm;
+        // Attach stepper motor in microstepper mode
+        SkyPointer_MicroStepper *getMicroStepper(uint16_t steps, uint8_t num);
+        // Attach stepper motor in normal mode
+        SkyPointer_StepperMotor *getStepper(uint16_t steps, uint8_t n);
+    
+    private:
+        SkyPointer_MicroStepper microsteppers[2];   // Array to store the motors
+                                                    // in microstep mode  
+        SkyPointer_StepperMotor steppers[2];        // Array to store the motors
+                                                    // in normal mode
+        // Variables for setting the board
+        uint8_t _addr;
+        uint16_t _freq;
+    
+
+        
+        Adafruit_PWMServoDriver _pwm;
 };
 
 #endif
