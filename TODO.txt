@@ -1,0 +1,2 @@
+[ ] Remove lines that call to setSpeed, as they do nothing actually.
+[ ] Add description of differences between currPos and currMicrostep
