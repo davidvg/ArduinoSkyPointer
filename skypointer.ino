@@ -1,6 +1,3 @@
-/*
-
-*/
 /******************************************************************************
 TO-DO
 --------------------------
@@ -20,234 +17,175 @@ TO-DO
 #include <SkyPointer_MotorShield.h>
 #include <TimerOne.h>
 
+// A modulo operator that handles negative numbers
+#define MOD(a,b) ((((a)%(b))+(b))%(b))
 
-// DEBUG
-uint8_t count = 0;
-unsigned long avg = 0;
-uint32_t dt = 10000;
+// Motor parameters
+#define STEPS 200
+#define USTEPS 16
+#define TOTAL_USTEPS (STEPS*USTEPS)
 
-// Target position [absolute steps]
-uint16_t target[2];
-// Desired rotation speed in rpm
-uint8_t rpm = 1;
-// Bool for controlling rotation status
-bool moving = false;
+// Speed parameters
+#define DT 6000 // Timer1 interrupt period
+#define RPM 1   // Desired rotation speed in rpm
 
-// Motor Parameters
-uint8_t steps = 200;
-uint8_t usteps = 16;
-uint16_t totalMicrosteps = (uint16_t) (steps * usteps); // Needs 16 bit
+#define LASER_PIN 13
+
 
 // Definition of the SerialCommand object, with delimiter ":"
 SerialCommand sCmd;
 // Definition of the motor shield
-SkyPointer_MotorShield MS = SkyPointer_MotorShield ();
+SkyPointer_MotorShield MS = SkyPointer_MotorShield();
 // Motor 1 on port 1, 200 steps/rev
-SkyPointer_MicroStepper *motor1 = MS.getMicroStepper(steps, 1);
+SkyPointer_MicroStepper *motor1 = MS.getMicroStepper(STEPS, 1);
 // Motor 2 on port 2, 200 steps/rev
-SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(steps, 2);
-/******************************************************************************/
-// Routine for interruption
+SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
+
+
+// Interruption routine
 void ISR_rotate() {
+  uint16_t pos, sim_pos, tg;
+  uint8_t dir;
 
-  // DEBUG
-  count++;
-  unsigned long t = micros(); // DEBUG  --  Time control per ISR callback
+  sei();  // Enable interrupts --> Serial, I2C (MotorShield)
 
-  // Enable interrupts --> Serial, I2C (MotorShield)
-  sei();
-  //digitalWrite (13 , digitalRead(13) ^ 1);                // DEBUG
-
-  uint16_t pos1, pos2, posSim1, posSim2, t1, t2;   // Define some variables for easy handling
-  // Get the current position for both motors
-  pos1 = motor1->getPosition();
-  pos2 = motor2->getPosition();
-  // Calculate simmetric point to current position
-  uint16_t delta = 0.5 * totalMicrosteps;
-  posSim1 = (pos1 + delta) % totalMicrosteps;
-  posSim2 = (pos2 + delta) % totalMicrosteps;
-  // Get target for both motors
-  t1 = motor1->target;
-  t2 = motor2->target;
-
-  // Rotating the motors in the right direction
   // MOTOR 1
+  pos = motor1->getPosition();
+  // Calculate simmetric point to current position
+  sim_pos = (pos + TOTAL_USTEPS/2) % TOTAL_USTEPS;
+  tg = motor1->target;
+
   if (!motor1->isTarget()) {  // Check target has not been reached
-    if (pos1 < totalMicrosteps / 2) {
-      if ((t1 > pos1) && (t1 < posSim1)) {
-        motor1->microstep(1, FORWARD);
-      }
-      else {
-        motor1->microstep(1, BACKWARD);
-      }
+    if (pos < TOTAL_USTEPS/2) {
+      dir = ((tg > pos) && (tg < sim_pos)) ? FORWARD : BACKWARD;
+    } else {
+      dir = ((tg > pos) || (tg < sim_pos)) ? FORWARD : BACKWARD;
     }
-    else {
-      if ((t1 > pos1) || (t1 < posSim1)) {
-        motor1->microstep(1, FORWARD);
-      }
-      else {
-        motor1->microstep(1, BACKWARD);
-      }
-    }
+    motor1->microstep(1, dir);
   }
+
   // MOTOR 2
+  pos = motor2->getPosition();
+  // Calculate simmetric point to current position
+  sim_pos = (pos + TOTAL_USTEPS/2) % TOTAL_USTEPS;
+  tg = motor2->target;
+
   if (!motor2->isTarget()) {  // Check target has not been reached
-    if (pos2 < totalMicrosteps / 2) {
-      if ((t2 > pos2) && (t2 < posSim2)) {
-        motor2->microstep(1, FORWARD);
-      }
-      else {
-        motor2->microstep(1, BACKWARD);
-      }
+    if (pos < TOTAL_USTEPS/2) {
+      dir = ((tg > pos) && (tg < sim_pos)) ? FORWARD : BACKWARD;
+    } else {
+      dir = ((tg > pos) || (tg < sim_pos)) ? FORWARD : BACKWARD;
     }
-    else {
-      if ((t2 > pos2) || (t2 < posSim2)) {
-        motor2->microstep(1, FORWARD);
-      }
-      else {
-        motor2->microstep(1, BACKWARD);
-      }
-    }
+    motor2->microstep(1, dir);
   }
 
-/*
-      //Serial.println(totalMicrosteps);
-      Serial.print("M1 [pos, target]: [");
-      Serial.print(motor1->getPosition()); Serial.print(", ");
-      //Serial.print(posSim1); Serial.print(", ");
-      Serial.print(motor1->target); Serial.print("]");
-
-      Serial.print(" ## M2 [pos, target]: [" );
-      Serial.print(motor2->getPosition()); Serial.print(", ");
-      //Serial.print(posSim2); Serial.print(", ");
-      Serial.print(motor2->target); Serial.print("] ## [done1, done2]: [");
-
-      Serial.print(motor1->isTarget()); Serial.print(", "); Serial.print(motor2->isTarget());
-      Serial.println("]");
-*/
-
-/*
-  Serial.print("Position: ["); Serial.print(pos1); Serial.print(", ");
-  Serial.print(pos2); Serial.print("] # Target: ["); Serial.print(t1);
-  Serial.print(", "); Serial.print(t2); Serial.print("] # Done? [");
-  Serial.print(motor1->isTarget()); Serial.print(", ");
-  Serial.print(motor2->isTarget()); Serial.println("]");
-
-*/
-  // DEBUG -- Time control per ISR callback
-  //Serial.print("Time per callback [us]: "); Serial.println(micros() - t);
-  avg += micros() - t;
-
-  // Check if target is achieved
+  // Check if target is reached
   // This needs to be changed to invoke a new function to be created.
   // This function must turn the laser on.
   if ((motor1->isTarget()) && (motor2->isTarget())) {
     Timer1.detachInterrupt();
-
-    // DEBUG -- Time control
-    Serial.println("Done.");
-    Serial.print("Delta t = "); Serial.print(dt);
-    Serial.println(" microseconds.");
-    Serial.print("Average time per callback ["); Serial.print(count);
-    Serial.print(" rotations]: "); Serial.print(avg / count);
-    Serial.println(" microseconds.");
-    Serial.println("------------------------------------------------------------");
   }
 }
-/******************************************************************************/
-// Functions for processing the commands received
-void Goto_wrap (uint16_t* _target) {
-  /* Wrapper for processing the GOTO command, as the SerialComand library doesn't
-  allow arguments for the functions for processing commands.
-  Updates de values of target with the received steps to run.
-  */
-  int buffer[10]; // Buffer fot incoming data
-  unsigned int i = 0;  // Counter for the buffer
-  char* arg = sCmd.next(); // Reads the Command (i.e., G, ...)
-  while (arg != NULL) {   // Fill the buffer
-    buffer[i] = atoi(arg);
-    //        Serial.println(buffer[i]);
-    arg = sCmd.next();
-    i++;
-  }
-  if (i >= sizeof(_target)) {
-    for (unsigned int n = 0; n < sizeof(_target); n++) {
-      _target[n] = buffer[n];  // Update target steps values
-      _target[n] = _target[n] % totalMicrosteps;
-    }
-  }
+
+/****************************************************************************
+ * Functions for processing the commands received
+ ***************************************************************************/
+
+// Update the target positions of both motors
+void ProcessGoto() {
+  uint16_t tgt1, tgt2;
+
+  tgt1 = MOD(atoi(sCmd.next()), TOTAL_USTEPS);
+  tgt2 = MOD(atoi(sCmd.next()), TOTAL_USTEPS);
+
+  motor1 -> setTarget(tgt1);
+  motor2 -> setTarget(tgt2);
+
+  Serial.print("OK\r");
+  Timer1.attachInterrupt(ISR_rotate);  // Enable TimerOne interrupt
 }
-void process_Goto () {
-  // Calls a wrapper function for updating the target steps.
-  // Also passes the values to rotate to the motors configuration
 
 
-    // DEBUG
-    count = 0;
-    avg = 0;
+// Move both motors to a relative position
+void ProcessMove() {
+  uint16_t tgt1, tgt2;
 
-  // Call the wrapper for the goto processor
-  Goto_wrap (target);
-  // Set the targets for the motors
-    motor1 -> setTarget(target[0]);
-    motor2 -> setTarget(target[1]);
-    moving = true;
+  tgt1 = MOD((int16_t)motor1->getPosition() + atoi(sCmd.next()), TOTAL_USTEPS);
+  tgt2 = MOD((int16_t)motor2->getPosition() + atoi(sCmd.next()), TOTAL_USTEPS);
 
-  // Output for received GOTO
-  if (moving) {
-    Serial.print("\nNew location received: ["); Serial.print(target[0]);
-    Serial.print(", "); Serial.print(target[1]); Serial.println("]");
-    Serial.println("Rotating...\n");
+  motor1 -> setTarget(tgt1);
+  motor2 -> setTarget(tgt2);
 
-    // Configure interrupt speed (microseconds); speed is equal for both motors
-    // Located here to allow for changes in speed if needed
-    //Timer1.initialize(motor1->getSpeed());
-    Timer1.initialize(dt);
-    // Enable TimerOne interrupt
-    Timer1.attachInterrupt(ISR_rotate);
-  }
+  Serial.print("OK\r\n");
+  Timer1.attachInterrupt(ISR_rotate);  // Enable TimerOne interrupt
 }
+
+
+// Stop both motors
+void ProcessStop() {
+  motor1 -> setTarget(motor1->getPosition());
+  motor2 -> setTarget(motor2->getPosition());
+
+  Serial.print("OK\r");
+  Timer1.attachInterrupt(ISR_rotate);  // Enable TimerOne interrupt
+}
+
+
+// Get the current position of the motors
+void ProcessGetPos() {
+  char buf[13];
+  uint16_t tgt1, tgt2;
+
+  tgt1 = motor1->getPosition();
+  tgt2 = motor2->getPosition();
+
+  sprintf(buf, "P %04d %04d\r", tgt1, tgt2);
+  Serial.print(buf);
+}
+
+
+// Enable/disable the laser module
+void ProcessLaser() {
+  uint8_t enable;
+
+  enable = atoi(sCmd.next()) != 0;
+  digitalWrite(LASER_PIN, enable);
+  Serial.print("OK\r");
+}
+
 
 // Handles unknown commands
-void unrecognized () {
-  Serial.println("What?");
+void Unrecognized() {
+  Serial.print("NK\r");
 }
-/******************************************************************************/
-void setup () {
+
+
+void setup() {
+  pinMode(LASER_PIN, OUTPUT);
+
   // Start the serial port
-  Serial.begin (115200);
+  Serial.begin(115200);
+
   // Add the commands to the SerialComnnand object
-  sCmd.addCommand ("G", process_Goto); // G:steps1:steps2
-  // Unknown commands
-  sCmd.addDefaultHandler (unrecognized);
+  sCmd.addCommand("G", ProcessGoto);    // G pos1 pos2\r
+  sCmd.addCommand("M", ProcessMove);    // M steps1 steps2\r
+  sCmd.addCommand("S", ProcessStop);    // S\r
+  sCmd.addCommand("P", ProcessGetPos);  // P\r
+  sCmd.addCommand("L", ProcessLaser);   // L enable\r
+  sCmd.addDefaultHandler(Unrecognized);	// Unknown commands
+
+  // Configure interrupt speed (microseconds)
+  Timer1.initialize(DT);
 
   // Start motor shield
   MS.begin();
-  motor1->setSpeed(rpm);
-  motor2->setSpeed(rpm);
+  motor1->setSpeed(RPM);
+  motor2->setSpeed(RPM);
 
-  pinMode(13, OUTPUT);                // DEBUG
-  //Timer1.initialize(500000);
-  //Timer1.attachInterrupt(ISR_rotate);
-
-  // Feedback
-  Serial.println("Waiting for commands...");
+  Serial.print("Waiting for commands...");
 }
-/******************************************************************************/
-void loop () {
-  // Read commands from serial port
-  sCmd.readSerial();
 
-  //Serial.println(motor1->getPosition());                // DEBUG
 
-  //Serial.println(motor1->target);                // DEBUG
-  // Run the motors to the targets defined in the goto processor
-
-  /*
-      if (moving == true && m1.distanceToGo() == 0 && m2.distanceToGo() == 0) {
-          Serial.println("Location achieved.");
-          Serial.println("Waiting for commands...");
-          moving = false; // Set moving status to false
-      }
-  */
+void loop() {
+  sCmd.readSerial();  // Read commands from serial port
 }
