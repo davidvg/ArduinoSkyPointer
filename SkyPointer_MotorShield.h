@@ -68,7 +68,7 @@ class SkyPointer_MicroStepper {
         void setTarget (uint16_t);  // Sets the value of the target for the motor   
         boolean isTarget(void);     // Returns True if currPos == target
         void setSpeed (float);      // Sets the speed of the motor ## TO-DO ##
-        uint32_t getSpeed();        // Returns the the speed of the motor in us
+        uint32_t getSpeed();        // Returns the speed of the motor in us
 
         // Function for a rotation of one microstep in any direction
         uint16_t microstep (uint16_t usteps, uint8_t dir);
