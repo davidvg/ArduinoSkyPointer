@@ -1,2 +1,5 @@
 [ ] Remove lines that call to setSpeed, as they do nothing actually.
 [ ] Add description of differences between currPos and currMicrostep
+[ ] Rename/rearrange variables: MS --> pointer
+[ ] Think about possible functions for config MotorShield and init MotorShield
+[ ] 
