@@ -94,6 +94,7 @@ class SkyPointer_MicroStepper {
 
 /******************************************************************************/
 //  TO-DO -- Make cleanup
+/*
 class SkyPointer_StepperMotor {
  public:
   SkyPointer_StepperMotor(void);
@@ -114,6 +115,7 @@ class SkyPointer_StepperMotor {
   SkyPointer_MotorShield *MC;
   uint8_t steppernum;
 };
+*/
 
 /******************************************************************************/
 
@@ -130,12 +132,12 @@ class SkyPointer_MotorShield {
         // Attach stepper motor in microstepper mode
         SkyPointer_MicroStepper *getMicroStepper(uint16_t steps, uint8_t num);
         // Attach stepper motor in normal mode
-        SkyPointer_StepperMotor *getStepper(uint16_t steps, uint8_t n);
+//        SkyPointer_StepperMotor *getStepper(uint16_t steps, uint8_t n);
     
     private:
         SkyPointer_MicroStepper microsteppers[2];   // Array to store the motors
                                                     // in microstep mode  
-        SkyPointer_StepperMotor steppers[2];        // Array to store the motors
+//        SkyPointer_StepperMotor steppers[2];        // Array to store the motors
                                                     // in normal mode
         // Variables for setting the board
         uint8_t _addr;

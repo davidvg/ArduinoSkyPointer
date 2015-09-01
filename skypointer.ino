@@ -26,7 +26,7 @@ TO-DO
 #define TOTAL_USTEPS (STEPS*USTEPS)
 
 // Speed parameters
-#define DT 6000 // Timer1 interrupt period
+#define DT 10000 // Timer1 interrupt period
 #define RPM 1   // Desired rotation speed in rpm
 
 #define LASER_PIN 13
