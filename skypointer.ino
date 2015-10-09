@@ -3,8 +3,8 @@ TO-DO
 --------------------------
 [ ] When target is negative rotation is along the long path
 [ ] Rethink the calculation of speed for Timer1 interrupts
-[ ] Function for turning laser on
-[ ] Feedback to the server with rotated distance for alignment
+[X] Function for turning laser on
+[X] Feedback to the server with rotated distance for alignment
 [X] Implement rotation direction in ISR_rotate
 [X] Calculate relative movement in the GOTO processor, equals target - currPos
 [X] Function for remapping currPos to [0, 3200] in microstep() function
@@ -116,7 +116,7 @@ void ProcessMove() {
   motor1 -> setTarget(tgt1);
   motor2 -> setTarget(tgt2);
 
-  Serial.print("OK\r\n");
+  Serial.print("OK\r");
   Timer1.attachInterrupt(ISR_rotate);  // Enable TimerOne interrupt
 }
 
@@ -154,6 +154,12 @@ void ProcessLaser() {
 }
 
 
+// Get ID
+void ProcessID() {
+  Serial.print("SkyPointer 1.0\r");
+}
+
+
 // Handles unknown commands
 void Unrecognized() {
   Serial.print("NK\r");
@@ -172,6 +178,7 @@ void setup() {
   sCmd.addCommand("S", ProcessStop);    // S\r
   sCmd.addCommand("P", ProcessGetPos);  // P\r
   sCmd.addCommand("L", ProcessLaser);   // L enable\r
+  sCmd.addCommand("I", ProcessID);      // I\r
   sCmd.addDefaultHandler(Unrecognized);	// Unknown commands
 
   // Configure interrupt speed (microseconds)
@@ -181,8 +188,6 @@ void setup() {
   MS.begin();
   motor1->setSpeed(RPM);
   motor2->setSpeed(RPM);
-
-  Serial.print("Waiting for commands...");
 }
 
 
