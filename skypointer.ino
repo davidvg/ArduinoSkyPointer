@@ -32,12 +32,18 @@ TO-DO
 #define LASER_PIN 13
 
 
+#define DEBUG 1
+// Pin for debug
+#ifdef DEBUG
+  int blinkLed = 12;
+#endif
+
 // Definition of the SerialCommand object, with delimiter ":"
 SerialCommand sCmd;
 // Definition of the motor shield
 SkyPointer_MotorShield MS = SkyPointer_MotorShield();
 // Motor 1 on port 1, 200 steps/rev
-SkyPointer_MicroStepper *motor1 = MS.getMicroStepper(STEPS, 1);
+SkyPointer_MicroStepper *motor1 =MS.getMicroStepper(STEPS, 1);
 // Motor 2 on port 2, 200 steps/rev
 SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
 
@@ -46,7 +52,18 @@ SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
 void ISR_rotate() {
   uint16_t pos, sim_pos, tg;
   uint8_t dir;
-
+  
+  #ifdef DEBUG
+      bool status;
+      status = digitalRead(blinkLed);
+      if (status == HIGH) {
+        digitalWrite(blinkLed, LOW);
+      }
+      else {
+        digitalWrite(blinkLed, HIGH);
+      }
+  #endif
+  
   sei();  // Enable interrupts --> Serial, I2C (MotorShield)
 
   // MOTOR 1
@@ -168,7 +185,10 @@ void Unrecognized() {
 
 void setup() {
   pinMode(LASER_PIN, OUTPUT);
-
+  #ifdef DEBUG
+    pinMode (blinkLed, OUTPUT);
+  #endif
+  
   // Start the serial port
   Serial.begin(115200);
 
