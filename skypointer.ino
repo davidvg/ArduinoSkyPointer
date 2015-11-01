@@ -50,9 +50,16 @@ SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
 
 // Interruption routine
 void ISR_rotate() {
+  #ifdef DEBUG
+    // Turns the LED on when entering the ISR
+    // Measures the duration of the interruption routine
+    digitalWrite (blinkLed, HIGH);
+  #endif
+
   uint16_t pos, sim_pos, tg;
   uint8_t dir;
-  
+
+/*  // Toggles LED status on each ISR callback
   #ifdef DEBUG
       bool status;
       status = digitalRead(blinkLed);
@@ -63,6 +70,7 @@ void ISR_rotate() {
         digitalWrite(blinkLed, HIGH);
       }
   #endif
+*/
   
   sei();  // Enable interrupts --> Serial, I2C (MotorShield)
 
@@ -102,6 +110,10 @@ void ISR_rotate() {
   if ((motor1->isTarget()) && (motor2->isTarget())) {
     Timer1.detachInterrupt();
   }
+  
+  #ifdef DEBUG
+    digitalWrite (blinkLed, LOW);   // Turn the l¡LED off in ISR exit
+  #endif
 }
 
 /****************************************************************************
@@ -187,6 +199,7 @@ void setup() {
   pinMode(LASER_PIN, OUTPUT);
   #ifdef DEBUG
     pinMode (blinkLed, OUTPUT);
+    digitalWrite (blinkLed, LOW);   // Turn off the LED
   #endif
   
   // Start the serial port
