@@ -53,7 +53,43 @@ SkyPointer_MicroStepper *motor1 =MS.getMicroStepper(STEPS, 1);
 // Motor 2 on port 2, 200 steps/rev
 SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
 
+/****************************************************************************
+ * Functions for writing/reading mechanical errors to/from EPRROM
+ ***************************************************************************/
+void writeErrorToEEPROM (int n, double Z) {
+    // Writes to EEPROM the n-th error correction, where n = 1, 2 or 3
+    /*
+    Values are converted to a double int by multiplying by 100.000.000
+    The longest value is 4-byte long:
+        LSB = 
+        
+        MSB = 
+    */
+    
+    for (unsigned int k = 0; k < 12; k++) {
+        EEPROM.write (k, 0);
+    }
+    
+    long _z = long(Z * 1e8);
+    
+    for (unsigned int k = 0; k < 4; k++) {
+        // Write the 3 lowest bytes (not the sign)
+        Serial.println(int((_z >> 8*k) & 0xFF), HEX);
+        EEPROM.write(4*(n-1) + k, (int) ((_z >> 8*k) & 0xFF));
+    }
+}
 
+double readErrorFromEEPROM (int n) {
+    // Reads the n-th error stored in the EEPROM and converts it to double,
+    // where n = 1, 2 or 3
+    long res = 0;
+    for (unsigned int k = 0; k < 3; k++) {        
+        res += long((EEPROM.read(4*(n-1)+k)) << 8*k);
+    }
+    Serial.println(res, HEX);
+    return 0;
+}
+/****************************************************************************/
 // Interruption routine
 void ISR_rotate() {
   #ifdef DEBUG
@@ -199,41 +235,6 @@ void ProcessID() {
 void Unrecognized() {
   Serial.print("NK\r");
 }
-
-
-/****************************************************************************
- * Functions for writing/reading mechanical errors to/from EPRROM
- ***************************************************************************/
-void writeMechanicalErrors (double z1) {
-    // Writes mechanical error corrections to EEPROM
-    // Convert values to long int
-    long _z1 = long (z1 * 1e8);
-    EEPROM.write (0x00, _z1);
-    EEPROM.write (0x01, _z1 >> 8);
-    EEPROM.write (0x02, _z1 >> 16);
-    /*
-    long _z2 = long (z2 * 1e8);
-    EEPROM.write (0x03, _z2 >> 16);
-    EEPROM.write (0x04, _z2 >> 8);
-    EEPROM.write (0x05, _z2);
-    
-    long _z3 = long (z3 * 1e8);
-    EEPROM.write (0x06, _z3 >> 16);
-    EEPROM.write (0x07, _z3 >> 8);
-    EEPROM.write (0x08, _z3); 
-    */
-}
-
-double readMechanicalError (int n) {
-    // Reads one of the three mechanical errors, defined by the int n
-    long res = 0;
-    
-    for (unsigned int k = 0; k < 3; k++) {
-        res |= (Serial.println(EEPROM.read(3*n + k)) << 8*k );
-    }
-    return double(res);
-}
-
 /****************************************************************************/
 
 void setup() {
@@ -261,25 +262,18 @@ void setup() {
   // Start motor shield
   MS.begin();
   motor1->setSpeed(RPM);
-  motor2->setSpeed(RPM);
-  
+  motor2->setSpeed(RPM);  
 
-  double M = -0.99999999; // Longest possible value in HEX (negative value)
-  //double M = Z3;
-  Serial.print("Z1 = "); Serial.println(M, 8);
-  long z1  = long(M * 1e8);
-  Serial.print("HEX = "); Serial.println(z1, HEX);
-  int a = int(z1 & 0xFF);
-  Serial.print("B0 = "); Serial.println(a, HEX);
-  int b = int((z1 & 0xFF00) >> 8);
-  Serial.print ("B1 = "); Serial.println(b, HEX);
-  int c = int((z1 & 0xFF0000) >> 16);
-  Serial.print("B2 = "); Serial.println(c, HEX);
-  int d = int((z1 & 0xFF000000) >> 24);
-  Serial.print("B3 = "); Serial.println(d, HEX);
+  long err = Z1 * 1e8;
+  Serial.print ("Val = "); Serial.println (err, DEC);
+  Serial.print ("HEX = "); Serial.println (err, HEX);
   
+  writeErrorToEEPROM (1, Z1);
+  
+  readErrorFromEEPROM (1);
+
+
 }
-
 
 void loop() {
   sCmd.readSerial();  // Read commands from serial port
