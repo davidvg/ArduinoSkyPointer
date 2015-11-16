@@ -14,8 +14,9 @@ TO-DO
 #include <SoftwareSerial.h>
 #include <SerialCommand.h>
 #include <Wire.h>
-#include <SkyPointer_MotorShield.h>
+#include "SkyPointer_MotorShield.h"
 #include <TimerOne.h>
+#include <EEPROM.h>
 
 // A modulo operator that handles negative numbers
 #define MOD(a,b) ((((a)%(b))+(b))%(b))
@@ -24,6 +25,11 @@ TO-DO
 #define STEPS 200
 #define USTEPS 16
 #define TOTAL_USTEPS (STEPS*USTEPS)
+
+// Correction for mechanical errors
+#define Z1  0.00045725
+#define Z2 -0.00021926
+#define Z3 -0.06099543
 
 // Speed parameters
 #define DT 10000 // Timer1 interrupt period
@@ -195,6 +201,41 @@ void Unrecognized() {
 }
 
 
+/****************************************************************************
+ * Functions for writing/reading mechanical errors to/from EPRROM
+ ***************************************************************************/
+void writeMechanicalErrors (double z1) {
+    // Writes mechanical error corrections to EEPROM
+    // Convert values to long int
+    long _z1 = long (z1 * 1e8);
+    EEPROM.write (0x00, _z1);
+    EEPROM.write (0x01, _z1 >> 8);
+    EEPROM.write (0x02, _z1 >> 16);
+    /*
+    long _z2 = long (z2 * 1e8);
+    EEPROM.write (0x03, _z2 >> 16);
+    EEPROM.write (0x04, _z2 >> 8);
+    EEPROM.write (0x05, _z2);
+    
+    long _z3 = long (z3 * 1e8);
+    EEPROM.write (0x06, _z3 >> 16);
+    EEPROM.write (0x07, _z3 >> 8);
+    EEPROM.write (0x08, _z3); 
+    */
+}
+
+double readMechanicalError (int n) {
+    // Reads one of the three mechanical errors, defined by the int n
+    long res = 0;
+    
+    for (unsigned int k = 0; k < 3; k++) {
+        res |= (Serial.println(EEPROM.read(3*n + k)) << 8*k );
+    }
+    return double(res);
+}
+
+/****************************************************************************/
+
 void setup() {
   pinMode(LASER_PIN, OUTPUT);
   #ifdef DEBUG
@@ -221,6 +262,22 @@ void setup() {
   MS.begin();
   motor1->setSpeed(RPM);
   motor2->setSpeed(RPM);
+  
+
+  double M = -0.99999999; // Longest possible value in HEX (negative value)
+  //double M = Z3;
+  Serial.print("Z1 = "); Serial.println(M, 8);
+  long z1  = long(M * 1e8);
+  Serial.print("HEX = "); Serial.println(z1, HEX);
+  int a = int(z1 & 0xFF);
+  Serial.print("B0 = "); Serial.println(a, HEX);
+  int b = int((z1 & 0xFF00) >> 8);
+  Serial.print ("B1 = "); Serial.println(b, HEX);
+  int c = int((z1 & 0xFF0000) >> 16);
+  Serial.print("B2 = "); Serial.println(c, HEX);
+  int d = int((z1 & 0xFF000000) >> 24);
+  Serial.print("B3 = "); Serial.println(d, HEX);
+  
 }
 
 
