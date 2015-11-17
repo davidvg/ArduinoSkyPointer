@@ -70,9 +70,10 @@ void writeErrorToEEPROM (int n, double Z) {
 }
 
 void writeAllErrorsToEEPROM (double z1, double z2, double z3) {
-    writeErrorToEEPROM (1, Z1);
-    writeErrorToEEPROM (2, Z2);
-    writeErrorToEEPROM (3, Z3);
+    double z[3] = {z1, z2, z3};
+    for (int k = 0; k < 3; k++) {
+        writeErrorToEEPROM (k+1, z[k]);
+    }
 }
 
 double readErrorFromEEPROM (int n) {
@@ -260,9 +261,6 @@ void setup() {
   motor2->setSpeed(RPM);  
 
 
-
-  // Array with the errors
-  double Z[3] = {(double) Z1, (double) Z2, (double) Z3};
   // Write the errors
   writeAllErrorsToEEPROM ((double) Z1, (double) Z2, (double) Z3);
   
