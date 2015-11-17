@@ -17,6 +17,7 @@ TO-DO
 #include "SkyPointer_MotorShield.h"
 #include <TimerOne.h>
 #include <EEPROM.h>
+//#include "EEPROM_Anything/EEPROM_Anything.h"
 
 // A modulo operator that handles negative numbers
 #define MOD(a,b) ((((a)%(b))+(b))%(b))
@@ -65,30 +66,34 @@ void writeErrorToEEPROM (int n, double Z) {
         
         MSB = 
     */
-    
     for (unsigned int k = 0; k < 12; k++) {
         EEPROM.write (k, 0);
     }
-    
-    long _z = long(Z * 1e8);
-    
+    signed long _z = (signed long) (Z * 1e8);
     for (unsigned int k = 0; k < 4; k++) {
         // Write the 3 lowest bytes (not the sign)
-        Serial.println(int((_z >> 8*k) & 0xFF), HEX);
         EEPROM.write(4*(n-1) + k, (int) ((_z >> 8*k) & 0xFF));
     }
 }
 
-double readErrorFromEEPROM (int n) {
+signed long readErrorFromEEPROM (int n) {
     // Reads the n-th error stored in the EEPROM and converts it to double,
     // where n = 1, 2 or 3
-    long res = 0;
-    for (unsigned int k = 0; k < 3; k++) {        
-        res += long((EEPROM.read(4*(n-1)+k)) << 8*k);
+    signed long res = 0;
+    for (unsigned int k = 0; k < 4; k++) {        
+        res |= (signed long) ((signed long) (EEPROM.read(4*(n-1)+k)) << 8*k);
+        //int aux = EEPROM.read(4*(n-1)+k);
+        //Serial.print ("Aux = "); Serial.println(aux, HEX);
+        //signed long aux = (signed long) (EEPROM.read(4*(n-1)+k));
+        //res += (aux << (8*k));
     }
-    Serial.println(res, HEX);
-    return 0;
+    //Serial.print("Res = "); Serial.print(res, HEX); Serial.print(" = ");
+    //Serial.println(res, DEC);
+    return res;
 }
+
+
+
 /****************************************************************************/
 // Interruption routine
 void ISR_rotate() {
@@ -264,15 +269,19 @@ void setup() {
   motor1->setSpeed(RPM);
   motor2->setSpeed(RPM);  
 
-  long err = Z1 * 1e8;
-  Serial.print ("Val = "); Serial.println (err, DEC);
-  Serial.print ("HEX = "); Serial.println (err, HEX);
-  
-  writeErrorToEEPROM (1, Z1);
-  
-  readErrorFromEEPROM (1);
-
-
+  // Array with the errors
+  double Z[3] = {(double) Z1, (double) Z2, (double) Z3};
+  for (unsigned int k = 0; k < 3; k++) {
+    // Write to EEPROM
+    writeErrorToEEPROM (k+1, Z[k]);
+    // Read from EEPROM
+    signed long aux = readErrorFromEEPROM(k+1);
+    // Print some info
+    Serial.print("Z"); Serial.print(k+1, DEC); Serial.print( " = ");
+    Serial.print(Z[k], 8); Serial.print("  |  ");
+    Serial.print("Res"); Serial.print(k+1, DEC); Serial.print(" = ");
+    Serial.println(aux, DEC);
+  }
 }
 
 void loop() {
