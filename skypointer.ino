@@ -223,6 +223,7 @@ void ProcessWriteEEPROM () {
     
 }
 
+// Read errors from EEPROM
 void ProcessReadEEPROM () {
 
 }
@@ -262,11 +263,9 @@ void setup() {
   motor1->setSpeed(RPM);
   motor2->setSpeed(RPM);  
 
-
+/*
   // Write the errors
   writeAllErrorsToEEPROM ((double) Z1, (double) Z2, (double) Z3);
-  
-
   // Test: read the errors
   double a = readErrorFromEEPROM(1);
   double b = readErrorFromEEPROM(2);
@@ -276,7 +275,7 @@ void setup() {
   Serial.print ("  |  "); Serial.print(b, 8);
   Serial.print ("  |  "); Serial.print(c, 8);
   Serial.println("");
-  
+*/  
 }
 
 void loop() {
