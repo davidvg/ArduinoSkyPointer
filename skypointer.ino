@@ -17,7 +17,6 @@ TO-DO
 #include "SkyPointer_MotorShield.h"
 #include <TimerOne.h>
 #include <EEPROM.h>
-//#include "EEPROM_Anything/EEPROM_Anything.h"
 
 // A modulo operator that handles negative numbers
 #define MOD(a,b) ((((a)%(b))+(b))%(b))
@@ -59,14 +58,18 @@ SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
  ***************************************************************************/
 void writeErrorToEEPROM (int n, double Z) {
     // Writes to EEPROM the n-th error correction, where n = 1, 2 or 3
+    /*
+    The error, expressed in rads, is multiplied by 10e8 to get a long int.
+    Then it's divided in 4 bytes that are written in 4 EEPROM addresses.
+    
+    */
     signed long _z = (signed long) (Z * 1e8);
-    for (unsigned int k = 0; k < 4; k++) {
-        // Write the 3 lowest bytes (not the sign)
+    for (int k = 0; k < 4; k++) {
         EEPROM.write(4*(n-1) + k, (int) ((_z >> 8*k) & 0xFF));
     }
 }
 
-void writeAllToEEPROM (double z1, double z2, double z3) {
+void writeAllErrorsToEEPROM (double z1, double z2, double z3) {
     writeErrorToEEPROM (1, Z1);
     writeErrorToEEPROM (2, Z2);
     writeErrorToEEPROM (3, Z3);
@@ -260,12 +263,10 @@ void setup() {
 
   // Array with the errors
   double Z[3] = {(double) Z1, (double) Z2, (double) Z3};
-  writeAllToEEPROM ((double) Z1, (double) Z2, (double) Z3);
-
-}
-
-void loop() {
-  sCmd.readSerial();  // Read commands from serial port
+  // Write the errors
+  writeAllErrorsToEEPROM ((double) Z1, (double) Z2, (double) Z3);
+  
+  // Test: read the errors
   double a = readErrorFromEEPROM(1);
   double b = readErrorFromEEPROM(2);
   double c = readErrorFromEEPROM(3);
@@ -274,4 +275,8 @@ void loop() {
   Serial.print ("  |  "); Serial.print(b, 8);
   Serial.print ("  |  "); Serial.print(c, 8);
   Serial.println("");
+}
+
+void loop() {
+  sCmd.readSerial();  // Read commands from serial port
 }
