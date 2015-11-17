@@ -59,16 +59,6 @@ SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
  ***************************************************************************/
 void writeErrorToEEPROM (int n, double Z) {
     // Writes to EEPROM the n-th error correction, where n = 1, 2 or 3
-    /*
-    Values are converted to a double int by multiplying by 100.000.000
-    The longest value is 4-byte long:
-        LSB = 
-        
-        MSB = 
-    */
-    for (unsigned int k = 0; k < 12; k++) {
-        EEPROM.write (k, 0);
-    }
     signed long _z = (signed long) (Z * 1e8);
     for (unsigned int k = 0; k < 4; k++) {
         // Write the 3 lowest bytes (not the sign)
@@ -76,24 +66,21 @@ void writeErrorToEEPROM (int n, double Z) {
     }
 }
 
-signed long readErrorFromEEPROM (int n) {
+void writeAllToEEPROM (double z1, double z2, double z3) {
+    writeErrorToEEPROM (1, Z1);
+    writeErrorToEEPROM (2, Z2);
+    writeErrorToEEPROM (3, Z3);
+}
+
+double readErrorFromEEPROM (int n) {
     // Reads the n-th error stored in the EEPROM and converts it to double,
     // where n = 1, 2 or 3
     signed long res = 0;
-    for (unsigned int k = 0; k < 4; k++) {        
+    for (int k = 0; k < 4; k++) {        
         res |= (signed long) ((signed long) (EEPROM.read(4*(n-1)+k)) << 8*k);
-        //int aux = EEPROM.read(4*(n-1)+k);
-        //Serial.print ("Aux = "); Serial.println(aux, HEX);
-        //signed long aux = (signed long) (EEPROM.read(4*(n-1)+k));
-        //res += (aux << (8*k));
     }
-    //Serial.print("Res = "); Serial.print(res, HEX); Serial.print(" = ");
-    //Serial.println(res, DEC);
-    return res;
+    return (double) (res / 1e8);
 }
-
-
-
 /****************************************************************************/
 // Interruption routine
 void ISR_rotate() {
@@ -269,21 +256,22 @@ void setup() {
   motor1->setSpeed(RPM);
   motor2->setSpeed(RPM);  
 
+
+
   // Array with the errors
   double Z[3] = {(double) Z1, (double) Z2, (double) Z3};
-  for (unsigned int k = 0; k < 3; k++) {
-    // Write to EEPROM
-    writeErrorToEEPROM (k+1, Z[k]);
-    // Read from EEPROM
-    signed long aux = readErrorFromEEPROM(k+1);
-    // Print some info
-    Serial.print("Z"); Serial.print(k+1, DEC); Serial.print( " = ");
-    Serial.print(Z[k], 8); Serial.print("  |  ");
-    Serial.print("Res"); Serial.print(k+1, DEC); Serial.print(" = ");
-    Serial.println(aux, DEC);
-  }
+  writeAllToEEPROM ((double) Z1, (double) Z2, (double) Z3);
+
 }
 
 void loop() {
   sCmd.readSerial();  // Read commands from serial port
+  double a = readErrorFromEEPROM(1);
+  double b = readErrorFromEEPROM(2);
+  double c = readErrorFromEEPROM(3);
+  
+  Serial.print(a, 8);
+  Serial.print ("  |  "); Serial.print(b, 8);
+  Serial.print ("  |  "); Serial.print(c, 8);
+  Serial.println("");
 }
