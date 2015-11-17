@@ -220,21 +220,35 @@ void ProcessID() {
 
 // Write errors to EEPROM
 void ProcessWriteEEPROM () {
-
+  // Gets the errors from the Serial port and writes them to EEPROM
+//  uint8_t bytes[51];
+  // Parse the string
+//  uint8_t arg = atoi(sCmd.next());
+//  for (int k = 0; k < 12; k++) {
+//    bytes [k] = atoi(sCmd.next());
+//    Serial.println(bytes[k], DEC);
+  
+  // Write to EEPROM
+//  for (int k = 0; k < 12; k++) {
+//    EEPROM.write(k, bytes[k]);
+//  }
 }
+
 
 // Read errors from EEPROM
 void ProcessReadEEPROM () {
   // Reads 12 bytes from EEPROM and sends them via Serial port.
-  char buf[52];
+  char buf[51];
   uint8_t datum[12];
   for (int k = 0; k < 12; k++) {
     datum[k] = EEPROM.read(k);
   }
   // Fill the buffer with the read data
-  sprintf(buf, "R %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d\r", datum[0], datum[1], datum[2], datum[3], datum[4], datum[5], datum[6], datum[7], datum[8], datum[9], datum[10], datum[11]);
+  sprintf (buf, "R %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d\r", datum[0], datum[1], datum[2], datum[3], datum[4], datum[5], datum[6], datum[7], datum[8], datum[9], datum[10], datum[11]);
+  // Send the buffer via Serial
   Serial.print(buf);
 }
+
 
 // Handles unknown commands
 void Unrecognized() {
@@ -284,6 +298,7 @@ void setup() {
   Serial.print ("  |  "); Serial.print(c, 8);
   Serial.println("");
 */  
+  
 
 }
 
