@@ -227,12 +227,12 @@ void ProcessWriteEEPROM () {
 void ProcessReadEEPROM () {
   // Reads 12 bytes from EEPROM and sends them via Serial port.
   char buf[52];
-  uint8_t reads[12];
+  uint8_t datum[12];
   for (int k = 0; k < 12; k++) {
-    reads[k] = EEPROM.read(k);
+    datum[k] = EEPROM.read(k);
   }
   // Fill the buffer with the read data
-  sprintf(buf, "R %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d\r", reads[0], reads[1], reads[2], reads[3], reads[4], reads[5], reads[6], reads[7], reads[8], reads[9], reads[10], reads[11]);
+  sprintf(buf, "R %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d\r", datum[0], datum[1], datum[2], datum[3], datum[4], datum[5], datum[6], datum[7], datum[8], datum[9], datum[10], datum[11]);
   Serial.print(buf);
 }
 
