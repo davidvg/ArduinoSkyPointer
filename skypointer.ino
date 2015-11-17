@@ -1,15 +1,7 @@
-/******************************************************************************
-TO-DO
---------------------------
-[ ] When target is negative rotation is along the long path
-[ ] Rethink the calculation of speed for Timer1 interrupts
-[X] Function for turning laser on
-[X] Feedback to the server with rotated distance for alignment
-[X] Implement rotation direction in ISR_rotate
-[X] Calculate relative movement in the GOTO processor, equals target - currPos
-[X] Function for remapping currPos to [0, 3200] in microstep() function
-[X] Ensure arguments from parsing serial are in range [0, 3200]
-*/
+/*******************************************************************************
+
+
+*******************************************************************************/
 
 #include <SoftwareSerial.h>
 #include <SerialCommand.h>
@@ -63,7 +55,7 @@ void writeErrorToEEPROM (int n, double Z) {
     Then it's divided in 4 bytes that are written in 4 EEPROM addresses.
     
     */
-    signed long _z = (signed long) (Z * 1e8);
+    int32_t _z = (int32_t) (Z * 1e8);
     for (int k = 0; k < 4; k++) {
         EEPROM.write(4*(n-1) + k, (int) ((_z >> 8*k) & 0xFF));
     }
@@ -79,9 +71,9 @@ void writeAllErrorsToEEPROM (double z1, double z2, double z3) {
 double readErrorFromEEPROM (int n) {
     // Reads the n-th error stored in the EEPROM and converts it to double,
     // where n = 1, 2 or 3
-    signed long res = 0;
+    int32_t res = 0;
     for (int k = 0; k < 4; k++) {        
-        res |= (signed long) ((signed long) (EEPROM.read(4*(n-1)+k)) << 8*k);
+        res |= (int32_t) ((int32_t) (EEPROM.read(4*(n-1)+k)) << 8*k);
     }
     return (double) (res / 1e8);
 }
@@ -226,6 +218,14 @@ void ProcessID() {
   Serial.print("SkyPointer 1.0\r");
 }
 
+// Write errors to EEPROM
+void ProcessWriteEEPROM () {
+    
+}
+
+void ProcessReadEEPROM () {
+
+}
 
 // Handles unknown commands
 void Unrecognized() {
@@ -250,6 +250,8 @@ void setup() {
   sCmd.addCommand("P", ProcessGetPos);  // P\r
   sCmd.addCommand("L", ProcessLaser);   // L enable\r
   sCmd.addCommand("I", ProcessID);      // I\r
+  sCmd.addCommand("W", ProcessWriteEEPROM); // Write mechanical errors to EEPROM
+  sCmd.addCommand("R", ProcessReadEEPROM);  // Reads mechanical errors from EEPROM
   sCmd.addDefaultHandler(Unrecognized);	// Unknown commands
 
   // Configure interrupt speed (microseconds)
@@ -264,6 +266,7 @@ void setup() {
   // Write the errors
   writeAllErrorsToEEPROM ((double) Z1, (double) Z2, (double) Z3);
   
+
   // Test: read the errors
   double a = readErrorFromEEPROM(1);
   double b = readErrorFromEEPROM(2);
@@ -273,6 +276,7 @@ void setup() {
   Serial.print ("  |  "); Serial.print(b, 8);
   Serial.print ("  |  "); Serial.print(c, 8);
   Serial.println("");
+  
 }
 
 void loop() {
