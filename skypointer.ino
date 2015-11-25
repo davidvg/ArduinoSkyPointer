@@ -50,11 +50,6 @@ SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
  ***************************************************************************/
 void writeErrorToEEPROM (int n, double Z) {
     // Writes to EEPROM the n-th error correction, where n = 1, 2 or 3
-    /*
-    The error, expressed in rads, is multiplied by 10e8 to get a long int.
-    Then it's divided in 4 bytes that are written in 4 EEPROM addresses.
-    
-    */
     int32_t _z = (int32_t) (Z * 1e8);
     for (int k = 0; k < 4; k++) {
         EEPROM.write(4*(n-1) + k, (int) ((_z >> 8*k) & 0xFF));
@@ -220,31 +215,45 @@ void ProcessID() {
 
 // Write errors to EEPROM
 void ProcessWriteEEPROM () {
-  // Gets the errors from the Serial port and writes them to EEPROM
-//  uint8_t bytes[51];
-  // Parse the string
-//  uint8_t arg = atoi(sCmd.next());
-//  for (int k = 0; k < 12; k++) {
-//    bytes [k] = atoi(sCmd.next());
-//    Serial.println(bytes[k], DEC);
-  
-  // Write to EEPROM
-//  for (int k = 0; k < 12; k++) {
-//    EEPROM.write(k, bytes[k]);
-//  }
-}
+  // Gets the one error from the Serial port and write it to EEPROM
 
+/*
+  char *arg = sCmd.next();
+  uint8_t a = atoi(arg);
+  Serial.print (arg);
+  Serial.println();
+  Serial.println(a, DEC);
+  Serial.println(a, HEX);
+  
+*/
+  uint8_t buf[20];
+  uint8_t n = 0;
+  char *a = sCmd.next();
+  while (a != NULL) {
+    buf[n] = atoi(a);
+    //Serial.println(buf[n], DEC);
+    a = sCmd.next();
+    n++;
+  }
+  
+  //Serial.print("OK\r");
+
+  for (int k = 0; k < n; k++) {
+    EEPROM.write(k, buf[k]);
+  }
+  Serial.print("OK\r");
+}
 
 // Read errors from EEPROM
 void ProcessReadEEPROM () {
   // Reads 12 bytes from EEPROM and sends them via Serial port.
   char buf[51];
-  uint8_t datum[12];
+  uint8_t d[12];
   for (int k = 0; k < 12; k++) {
-    datum[k] = EEPROM.read(k);
+    d[k] = EEPROM.read(k); // Read data
   }
   // Fill the buffer with the read data
-  sprintf (buf, "R %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d\r", datum[0], datum[1], datum[2], datum[3], datum[4], datum[5], datum[6], datum[7], datum[8], datum[9], datum[10], datum[11]);
+  sprintf (buf, "R %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d\r", d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7], d[8], d[9], d[10], d[11]);
   // Send the buffer via Serial
   Serial.print(buf);
 }
@@ -298,8 +307,10 @@ void setup() {
   Serial.print ("  |  "); Serial.print(c, 8);
   Serial.println("");
 */  
-  
 
+  writeAllErrorsToEEPROM((double) Z1, (double) Z2, (double) Z3);
+  // Show original EEPROM values
+  ProcessReadEEPROM();
 }
 
 void loop() {
