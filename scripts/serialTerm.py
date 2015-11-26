@@ -2,6 +2,11 @@ import serial
 from random import randint
 from time import sleep
 
+print '\n' + '*'*80
+print 'Test that generates 12 random 8-bit ints and writes to EEPROM.'
+print 'It then reads the EEPROM and outputs the resulting values to be'
+print 'compared with a previous EEPROM state.'
+print '*'*80
 
 port = '/dev/ttyACM0'
 baud = 115200
@@ -43,3 +48,5 @@ r(3)
 print '\nNew EEPROM state:'
 w("R\r")
 r(60)
+
+print '*'*80

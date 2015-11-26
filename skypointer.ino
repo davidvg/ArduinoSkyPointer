@@ -213,36 +213,21 @@ void ProcessID() {
   Serial.print("SkyPointer 1.0\r");
 }
 
+
 // Write errors to EEPROM
 void ProcessWriteEEPROM () {
-  // Gets the one error from the Serial port and write it to EEPROM
-
-/*
-  char *arg = sCmd.next();
-  uint8_t a = atoi(arg);
-  Serial.print (arg);
-  Serial.println();
-  Serial.println(a, DEC);
-  Serial.println(a, HEX);
-  
-*/
-  uint8_t buf[20];
-  uint8_t n = 0;
-  char *a = sCmd.next();
+  // Reads (12) ints from Serial port and writes them to EEPROM, starting in
+  // address 0x00 and incrementing by 1 with each byte
+  uint8_t n = 0;         // Init address counter
+  char *a = sCmd.next(); // First element
   while (a != NULL) {
-    buf[n] = atoi(a);
-    //Serial.println(buf[n], DEC);
-    a = sCmd.next();
-    n++;
-  }
-  
-  //Serial.print("OK\r");
-
-  for (int k = 0; k < n; k++) {
-    EEPROM.write(k, buf[k]);
+    EEPROM.write(n, atoi(a));
+    a = sCmd.next(); // Get next element
+    n++;             // Increment address counter
   }
   Serial.print("OK\r");
 }
+
 
 // Read errors from EEPROM
 void ProcessReadEEPROM () {
