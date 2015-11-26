@@ -1,4 +1,5 @@
 /build*/**
+/commTest/**/build*/**
 *.*~
 *~
 *.cpp~

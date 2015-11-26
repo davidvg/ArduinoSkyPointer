@@ -231,10 +231,22 @@ void ProcessWriteEEPROM () {
 
 // Read errors from EEPROM
 void ProcessReadEEPROM () {
-  // Reads 12 bytes from EEPROM and sends them via Serial port.
-  char buf[51];
-  uint8_t d[12];
-  for (int k = 0; k < 12; k++) {
+  /* Reads 12 bytes from EEPROM, 4 by each error, and sends them via Serial port.
+  
+  */
+  /*
+  A string is generated in the form:
+    R b_0 b_1 b_2 ... b_10 b_11\r
+  where 'b_n' is the n-th byte.
+  The size of the buffer is then obtained:
+    R   --> 1 byte
+    b_x --> 3 bytes
+    \r  --> 2 bites
+  So we need to store (1 + 12x3 + 2) bytes = 39 bytes    
+  */
+  char buf[39];
+  uint8_t d[12];    // We have 12 values
+  for (int k = 0; k < sizeof(d); k++) {
     d[k] = EEPROM.read(k); // Read data
   }
   // Fill the buffer with the read data
@@ -278,24 +290,9 @@ void setup() {
   MS.begin();
   motor1->setSpeed(RPM);
   motor2->setSpeed(RPM);  
-
-/*
-  // Write the errors
-  writeAllErrorsToEEPROM ((double) Z1, (double) Z2, (double) Z3);
-  // Test: read the errors
-  double a = readErrorFromEEPROM(1);
-  double b = readErrorFromEEPROM(2);
-  double c = readErrorFromEEPROM(3);
-  
-  Serial.print(a, 8);
-  Serial.print ("  |  "); Serial.print(b, 8);
-  Serial.print ("  |  "); Serial.print(c, 8);
-  Serial.println("");
-*/  
-
-  writeAllErrorsToEEPROM((double) Z1, (double) Z2, (double) Z3);
-  // Show original EEPROM values
-  ProcessReadEEPROM();
+ 
+  // Reset EEPROM
+  writeAllErrorsToEEPROM(0, 0, 0);
 }
 
 void loop() {

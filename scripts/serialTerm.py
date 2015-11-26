@@ -12,41 +12,55 @@ port = '/dev/ttyACM0'
 baud = 115200
 
 ser = serial.Serial(port, baud, timeout=1)
-ser.close()
-ser.open()
-ser.flush()
+#ser.close()
+#ser.open()
+#ser.flush()
+sleep(3)
 
-sleep(.1)
 
-
+###################################
 def r(sz):
     read_data = ser.read(size=sz)
     print read_data
-
+###################################
 def w(data):
     for d in data:
         ser.write(d)
+###################################
+#ra = 'W'
+#for k in range(12):
+#    ra += ' ' + (str(randint(0, 255)))
+#ra += '\r'
+#print ra
+#w(ra)
+#sleep(.5)
+#r(3)
     
-# Initial state of EEPROM
-w("R\r")
-print 'EEPROM state:'
-r(60)
+#print 'EEPROM state:'
+#w("R\r")
+#r(50)
+
+#------------------------------------------------------------#
+# It doesn't work without this!
+r(50)
+#------------------------------------------------------------#
 
 ra = 'W'
 data = ''
 for k in range(12):
     data  = data + ' ' + (str(randint(0, 255)))
 ra = ra + data + '\r'
-
 # Test data to write
 print '\nRandom data:', data
-w(ra)
-print '\nWriting data to EEPROM...'
+w(ra); sleep(1)
+print 'Writing random data to EEPROM...'
 r(3)
 
 # Read EEPROM
-print '\nNew EEPROM state:'
+print '\nRead EEPROM state:'
 w("R\r")
-r(60)
+r(50)
 
-print '*'*80
+#ser.flush(); sleep(1)
+ser.close()
+print '*' * 80
