@@ -292,7 +292,7 @@ void setup() {
   motor2->setSpeed(RPM);  
  
   // Reset EEPROM
-  writeAllErrorsToEEPROM(0, 0, 0);
+  //writeAllErrorsToEEPROM((double) 0, (double) 0, (double) 0);
 }
 
 void loop() {
