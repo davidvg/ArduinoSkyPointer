@@ -232,25 +232,26 @@ void ProcessWriteEEPROM () {
 // Read errors from EEPROM
 void ProcessReadEEPROM () {
   /* Reads 12 bytes from EEPROM, 4 by each error, and sends them via Serial port.
-  
-  */
-  /*
+
   A string is generated in the form:
     R b_0 b_1 b_2 ... b_10 b_11\r
   where 'b_n' is the n-th byte.
   The size of the buffer is then obtained:
     R   --> 1 byte
-    b_x --> 3 bytes
+    b_x --> 3 bytes + y space
     \r  --> 2 bites
-  So we need to store (1 + 12x3 + 2) bytes = 39 bytes    
+  So we need to store (1 + 12x4 + 2) bytes = 51 bytes    
   */
-  char buf[39];
-  uint8_t d[12];    // We have 12 values
-  for (int k = 0; k < sizeof(d); k++) {
-    d[k] = EEPROM.read(k); // Read data
+  char buf[51];
+  // Init the buffer with the respose code letter
+  sprintf (buf, "R");
+  // Read EEPROM positions
+  for (int k = 0; k < 12; k++) {
+    // Append to the buffer
+    sprintf(buf + strlen(buf), " %03d", EEPROM.read(k));
   }
-  // Fill the buffer with the read data
-  sprintf (buf, "R %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d %03d\r", d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7], d[8], d[9], d[10], d[11]);
+  // Append eol
+  sprintf (buf + strlen(buf), "\r");
   // Send the buffer via Serial
   Serial.print(buf);
 }
