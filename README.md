@@ -6,12 +6,17 @@ It's a variation of the [Adafruit library](https://github.com/adafruit/Adafruit_
 
 The library focuses on stepper motors, and implements a slightly different method for microstepping.
 
-As in the original Adafruit library, there is a `utility` folder, that includes some necessary code. It must be placed in the same folder than the `.cpp` and `.h` files for the library.
+As in the original Adafruit library, there is a `utility` folder, that includes some necessary code. It must be placed in the same folder than the `.cpp` and `.h` files for the library. In general, the code will be in the ```libraries``` folder of your Arduino installation.
 
 ## How to use the library
 Here appears the code **specific to this library** to use it. Other necessary code is not shown.
 
-First we are going to define a new `SkyPointer_MotorShield` object and connect a 200 steps-per-revolution stepper motor to its port 1:
+First we are going to include the library:
+```C++
+#include <SkyPointer_MotorShield.h>
+```
+
+Now we define a new `SkyPointer_MotorShield` object and connect a 200 steps-per-revolution stepper motor to its port 1:
 ```C++
 SkyPointer_MotorShield MS = SkyPointer_MotorShield();
 SkyPointer_MicroStepper *motor1 =MS.getMicroStepper(200, 1);
