@@ -10,7 +10,7 @@ The library SkyPointer_MotorShield can be downloaded from:
 #include <SoftwareSerial.h>
 #include <SerialCommand.h>
 #include <Wire.h>
-#include <SkyPointer_MotorShield.h>
+#include "SkyPointer_MotorShield.h"
 #include <TimerOne.h>
 #include <EEPROM.h>
 
@@ -58,6 +58,13 @@ SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
 void ISR_timer(){
   // Check if the time the laser has been pointing to the object is equal to
   // the desired ON time
+  uint32_t t_on = MS.getTimeOn(); // Get the stored value for laser_t_on
+  if (t_on >= LASER_T_ON){
+    digitalWrite(LASER_PIN, LOW); // Turn off the laser
+    Timer1.detachInterrupt();     // Detach interruption
+  }
+  MS.setTimeOn(t_on + uint32_t(DT));// Increment with the current time
+
 }
 
 
@@ -114,7 +121,7 @@ void ISR_rotate() {
     Timer1.detachInterrupt();	// Stop Timer1 interruption
     // TURN OFF THE LASER
     //digitalWrite(LASER_PIN, LOW);
-    uint32_t temp = 0; // Initialize time counter
+    MS.setTimeOn(uint32_t(0));          // Set timer to current time
     Timer1.attachInterrupt(ISR_timer); // Attach temporization routine
 
 
