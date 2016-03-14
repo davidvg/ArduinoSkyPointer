@@ -124,11 +124,14 @@ class SkyPointer_MotorShield {
         SkyPointer_MicroStepper *getMicroStepper(uint16_t steps, uint8_t num);
         // Attach stepper motor in normal mode
 //        SkyPointer_StepperMotor *getStepper(uint16_t steps, uint8_t n);
+<<<<<<< HEAD
 
 	// Variable for setting the value for laser_t_on
 	void setTimeOn(uint32_t);
 	// Variable for getting the value for laser_t_on
 	uint32_t getTimeOn(void);
+=======
+>>>>>>> 6fab89c2bd3988511d810b3c66bb502626479e75
     
     private:
         SkyPointer_MicroStepper microsteppers[2];   // Array to store the motors
@@ -139,8 +142,12 @@ class SkyPointer_MotorShield {
         uint8_t _addr;
         uint16_t _freq;
     
+<<<<<<< HEAD
         // Variable for checking the ON time for the laser
 	uint32_t laser_t_on;
+=======
+
+>>>>>>> 6fab89c2bd3988511d810b3c66bb502626479e75
         
         Adafruit_PWMServoDriver _pwm;
 };

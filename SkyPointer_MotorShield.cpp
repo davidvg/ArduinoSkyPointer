@@ -70,9 +70,12 @@ void SkyPointer_MotorShield::begin(uint16_t freq) {
     _pwm.setPWMFreq(_freq);  // This is the maximum PWM frequency
     for (uint8_t i=0; i<16; i++)
     _pwm.setPWM(i, 0, 0);
+<<<<<<< HEAD
 
     // Initialize times
     laser_t_on = 0;
+=======
+>>>>>>> 6fab89c2bd3988511d810b3c66bb502626479e75
 }
 /******************************************************************************/
 void SkyPointer_MotorShield::setPWM(uint8_t pin, uint16_t value) {
@@ -90,6 +93,7 @@ void SkyPointer_MotorShield::setPin(uint8_t pin, boolean value) {
     else
     _pwm.setPWM(pin, 4096, 0);
 }
+<<<<<<< HEAD
 
 
 void SkyPointer_MotorShield::setTimeOn(uint32_t t){
@@ -100,6 +104,8 @@ void SkyPointer_MotorShield::setTimeOn(uint32_t t){
 uint32_t SkyPointer_MotorShield::getTimeOn() {
     return laser_t_on;
 }
+=======
+>>>>>>> 6fab89c2bd3988511d810b3c66bb502626479e75
 /*******************************************************************************
     ###  Class for the MicroStepper motor  ###
 *******************************************************************************/
