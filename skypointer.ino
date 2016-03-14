@@ -28,6 +28,8 @@ The library SkyPointer_MotorShield can be downloaded from:
 
 // Define laser pin
 #define LASER_PIN 12 // Change to 13 !!!
+// Define how long the laser stays on when the target has been reached
+#define LASER_T_ON 10000000  // 10 seconds
 
 //#define DEBUG_ISR 1  // Variable for Interruption debug
 // Pin for DEBUG_ISR
@@ -52,6 +54,13 @@ SkyPointer_MicroStepper *motor1 =MS.getMicroStepper(STEPS, 1);
 SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
 
 /****************************************************************************/
+// Timing routine
+void ISR_timer(){
+  // Check if the time the laser has been pointing to the object is equal to
+  // the desired ON time
+}
+
+
 // Interruption routine
 void ISR_rotate() {
   #ifdef DEBUG_ISR
@@ -104,7 +113,11 @@ void ISR_rotate() {
     // If both motors are in the target position...
     Timer1.detachInterrupt();	// Stop Timer1 interruption
     // TURN OFF THE LASER
-    digitalWrite(LASER_PIN, LOW);
+    //digitalWrite(LASER_PIN, LOW);
+    uint32_t temp = 0; // Initialize time counter
+    Timer1.attachInterrupt(ISR_timer); // Attach temporization routine
+
+
     // Must check a global variable that contains the status of the laser, ON or OFF, so the program cannot turn it off if it has been turned on by choice.
     //
     // This variable is not yet defined.
