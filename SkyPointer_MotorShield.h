@@ -6,15 +6,6 @@
 
 
  ******************************************************************/
-
-/*
-TO-DO
-[ ] Custom number of microsteps per step, 8, 16, 32, 64...
-[X] currStep is uint16_t and always increases -> constrain to [0, 3199]
-*/
-    
-
-
 #ifndef _SkyPointer_MotorShield_h_
 #define _SkyPointer_MotorShield_h_
 

@@ -37,7 +37,7 @@
 #endif
 #include <Wire.h>
 #include "SkyPointer_MotorShield.h"
-#include "utility/Adafruit_PWMServoDriver.h"
+#include "utility/Adafruit_PWMServoDriver.h" // It's local to this path
 #ifdef __AVR__
  #define WIRE Wire
 #else // Arduino Due
