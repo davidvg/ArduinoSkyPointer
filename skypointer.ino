@@ -10,7 +10,7 @@ The library SkyPointer_MotorShield can be downloaded from:
 #include <SoftwareSerial.h>
 #include <SerialCommand.h>
 #include <Wire.h>
-#include "SkyPointer_MotorShield.h"
+#include <SkyPointer_MotorShield.h>
 #include <TimerOne.h>
 #include <EEPROM.h>
 
