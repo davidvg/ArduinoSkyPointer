@@ -26,10 +26,12 @@ The library SkyPointer_MotorShield can be downloaded from:
 #define DT 10000 // Timer1 interrupt period
 //#define RPM 1   // Desired rotation speed in rpm
 
-// Define laser pin
-#define LASER_PIN 12 // Change to 13 !!!
+// Define pins
+#define LASER_PIN 13
+#define PHOTO_PIN A0
+
 // Define how long the laser stays on when the target has been reached
-#define LASER_T_ON 10000000  // 10 seconds
+#define LASER_T_ON 4000000  // 4 seconds
 
 //#define DEBUG_ISR 1  // Variable for Interruption debug
 // Pin for DEBUG_ISR
@@ -52,6 +54,8 @@ SkyPointer_MotorShield MS = SkyPointer_MotorShield();
 SkyPointer_MicroStepper *motor1 =MS.getMicroStepper(STEPS, 1);
 // Motor 2 on port 2, 200 steps/rev
 SkyPointer_MicroStepper *motor2 = MS.getMicroStepper(STEPS, 2);
+
+int home = false;
 
 /****************************************************************************/
 // Timing routine
@@ -106,13 +110,23 @@ void ISR_rotate() {
   sim_pos = (pos + TOTAL_USTEPS/2) % TOTAL_USTEPS;
   tg = motor2->target;
 
-  if (!motor2->isTarget()) {  // Check target has not been reached
-    if (pos < TOTAL_USTEPS/2) {
-      dir = ((tg > pos) && (tg < sim_pos)) ? FORWARD : BACKWARD;
+  if (home) {
+    // if homing, move motor2 until the photodiode gets interrupted
+    if (analogRead(PHOTO_PIN) < 512) {
+      motor2->microstep(1, 0);
     } else {
-      dir = ((tg > pos) || (tg < sim_pos)) ? FORWARD : BACKWARD;
+      motor2->setPos(0);
+      home = false;
     }
-    motor2->microstep(1, dir);
+  } else {
+    if (!motor2->isTarget()) {  // Check target has not been reached
+      if (pos < TOTAL_USTEPS/2) {
+        dir = ((tg > pos) && (tg < sim_pos)) ? FORWARD : BACKWARD;
+      } else {
+        dir = ((tg > pos) || (tg < sim_pos)) ? FORWARD : BACKWARD;
+      }
+      motor2->microstep(1, dir);
+    }
   }
 
   // Check if target is reached
@@ -124,10 +138,9 @@ void ISR_rotate() {
     MS.setTimeOn(uint32_t(0));          // Set timer to current time
     Timer1.attachInterrupt(ISR_timer); // Attach temporization routine
 
-
-    // Must check a global variable that contains the status of the laser, ON or OFF, so the program cannot turn it off if it has been turned on by choice.
-    //
-    // This variable is not yet defined.
+    // Must check a global variable that contains the status of the laser, ON
+    // or OFF, so the program cannot turn it off if it has been turned on by
+    // choice. This variable is not yet defined.
   }
 
   #ifdef DEBUG_ISR
@@ -179,6 +192,14 @@ void ProcessStop() {
 }
 
 
+// Go to home position (elevation motor only)
+void ProcessHome() {
+  home = true;
+  Serial.print("OK\r");
+  Timer1.attachInterrupt(ISR_rotate);  // Enable TimerOne interruption
+}
+
+
 // Get the current position of the motors
 void ProcessGetPos() {
   char buf[13];
@@ -198,6 +219,15 @@ void ProcessLaser() {
 
   enable = atoi(sCmd.next()) != 0;
   digitalWrite(LASER_PIN, enable);
+  Serial.print("OK\r");
+}
+
+
+// Release motors and shut down laser
+void ProcessQuit() {
+  motor1->release();
+  motor2->release();
+  digitalWrite(LASER_PIN, 0);
   Serial.print("OK\r");
 }
 
@@ -265,10 +295,12 @@ void setup() {
   sCmd.addCommand("M", ProcessMove);    // M steps1 steps2\r
   sCmd.addCommand("S", ProcessStop);    // S\r
   sCmd.addCommand("P", ProcessGetPos);  // P\r
+  sCmd.addCommand("H", ProcessHome);    // H\r
   sCmd.addCommand("L", ProcessLaser);   // L enable\r
   sCmd.addCommand("I", ProcessID);      // I\r
   sCmd.addCommand("W", ProcessWriteCalib); // Write calibration value to EEPROM
   sCmd.addCommand("R", ProcessReadCalib);  // Read calibration value from EEPROM
+  sCmd.addCommand("Q", ProcessQuit);    // Release motors and shut down laser
   sCmd.addDefaultHandler(Unrecognized);	// Unknown commands
 
   // Configure interrupt speed (microseconds)
