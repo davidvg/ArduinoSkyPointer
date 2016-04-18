@@ -1,2 +1,0 @@
-[X] Substitute 'signed/unsigned long' for 'int32_t/uin32_t'
-[ ] Add description of differences between currPos and currMicrostep
