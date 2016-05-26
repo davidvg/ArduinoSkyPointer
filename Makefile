@@ -8,7 +8,7 @@
 # 	https://github.com/sudar/Arduino-Makefile
 
 BOARD_TAG    = uno
-ARDUINO_LIBS = SkyPointer_MotorShield Wire SoftwareSerial SerialCommand TimerOne EEPROM
+ARDUINO_LIBS = SkyPointer_MotorShield 
 ARDUINO_PORT = /dev/ttyACM0
 
 include ~/src/Arduino-Makefile/Arduino.mk
