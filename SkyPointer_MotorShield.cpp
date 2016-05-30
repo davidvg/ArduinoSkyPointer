@@ -17,17 +17,19 @@ Date:      2016/Apr/26
 void config_shield(void) {
     pinMode(ENABLE, OUTPUT); 
     digitalWrite(ENABLE, LOW); 
-    digitalWrite(XDIR, HIGH);
+    //digitalWrite(XDIR, HIGH);
 }
 
-// Class for a motor
-Motor::Motor(uint8_t port_, uint8_t steps_) {
-    uint8_t port = port_;
+// Class for a motor; uses the STEPS value
+Motor::Motor(uint8_t port_) {
+    port = port_;
+    step_pin = 0;
+    dir_pin = 0;
+    currPosition = 0;
+    currMicrostep = 0;
 }
 
 void Motor::init(void) {
-    uint8_t step_pin = 0;
-    uint8_t dir_pin = 0;
     switch(port) {
         case 0:
             step_pin = XSTEP;
@@ -41,14 +43,29 @@ void Motor::init(void) {
             step_pin = ZSTEP;
             dir_pin = ZDIR;
             break;
-//        case 3:
-//            step_pin = WSTEP;
-//            dir_pin = WDIR;
-//            break;
     }
-    
     pinMode(step_pin, OUTPUT);
     pinMode(dir_pin, OUTPUT);
+}
+
+void Motor::setPosition(uint16_t pos) {
+    currPosition = pos;
+}
+
+uint16_t Motor::getPosition(void) {
+    return currPosition;
+}
+
+void Motor::setTarget(uint16_t tgt) {
+    target = tgt;
+}
+
+uint16_t Motor::getTarget(void) {
+    return target;
+}
+
+bool Motor::isTarget(void) {
+    return (currPosition == target);
 }
 
 void Motor::set_direction(uint8_t dir) {
@@ -57,7 +74,35 @@ void Motor::set_direction(uint8_t dir) {
 
 void Motor::rotate(uint8_t step_dir) {
 // Send a HIGH pulse to the port step pin.
-digitalWrite(step_pin, HIGH);
+    if (step_dir == 0) {     // Forward
+        currMicrostep++;
+        currPosition++;
+        // Check range 
+        currPosition += USTEPS_REV;
+        currPosition %= USTEPS_REV;
+    }
+    else {
+        if (currMicrostep == 0) {
+            currMicrostep = 4*USTEPS_REV -1;
+        }
+        else {
+            currMicrostep--;
+        }
+        if (currPosition == 0){
+            currPosition = USTEPS_REV - 1;
+        }
+        else {
+            currPosition--;
+        }
+        // Check range again
+        currPosition += USTEPS_REV;
+        currPosition %= USTEPS_REV;
+    }
+    // Check range for currMicrostep
+    currMicrostep += 4*MICROSTEPS;
+    currMicrostep %= 4*MICROSTEPS;
+
+    // Perform rotation
+    digitalWrite(step_pin, HIGH);
     digitalWrite(step_pin, LOW);
 }
-
