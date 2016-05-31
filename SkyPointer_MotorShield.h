@@ -13,7 +13,8 @@ This library is implemented for its use in the SkyPointer project:
 
 #include <inttypes.h>
 
-#ifdef DEVELOP
+// Speed for develop and normal behaviour
+#ifdef DEBUG
     #define DT 20000
 #else
     #define DT 100
@@ -54,7 +55,6 @@ class Motor {
         uint8_t port;
         uint8_t step_pin;
         uint8_t dir_pin;
-        uint16_t target;
 
         void init(void);
         void setPosition(uint16_t);
@@ -67,9 +67,8 @@ class Motor {
         void rotate(uint8_t dir);
 
     //private:
-        uint16_t currMicrostep;
         uint16_t currPosition;
-
+        uint16_t target;
 };
 
 

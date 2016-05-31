@@ -9,10 +9,10 @@ This library is implemented for its use in the SkyPointer project:
 
 *******************************************************************************/
 // If DEVELOP is defined, DT = 20ms
-#define DEVELOP
+#define DEBUG
 
 #include "SkyPointer_MotorShield.h"
-#include "Communications.h"
+//#include "Communications.h"
 
 #include <SoftwareSerial.h>
 #include <SerialCommand.h>
@@ -24,21 +24,18 @@ Motor AZ = Motor(X);
 
 void setup () {
     config_shield();
-    AZ.init();
+
     Serial.begin(115200);
 }
 
 void loop () {
-    AZ.rotate(BW);
+    AZ.rotate(FW);
 
-#ifdef DEVELOP
+#ifdef DEBUG
     // DEBUG
     uint16_t currPos = AZ.getPosition();
-    uint16_t currMstep = AZ.currMicrostep;
-    Serial.print("POS, MSTEP: ");
-    Serial.print(currPos, DEC);
-    Serial.print(", ");
-    Serial.println(currMstep, DEC);
+    Serial.print("POS: ");
+    Serial.println(currPos, DEC);
 #endif
 
     delayMicroseconds(DT);
