@@ -13,13 +13,18 @@ Date:      2016/May/26
 
 #include "SkyPointer_MotorShield.h"
 
-
-void config_shield(void) {
-    pinMode(ENABLE, OUTPUT); 
-    digitalWrite(ENABLE, LOW); 
-    //digitalWrite(XDIR, HIGH);
+// Shield class
+MotorShield::MotorShield(void) {
+    home = false;
 }
 
+void MotorShield::config(void) {
+    pinMode(ENABLE, OUTPUT); 
+    digitalWrite(ENABLE, LOW); 
+}
+
+
+// Motor Class
 Motor::Motor(uint8_t port_) {
     port = port_;
     step_pin = 0;
@@ -27,6 +32,7 @@ Motor::Motor(uint8_t port_) {
 
     target = 0;
     currPosition = 0;
+
     // Configure motor pins
     init();
 }
@@ -72,6 +78,19 @@ bool Motor::isTarget(void) {
 
 void Motor::set_direction(uint8_t dir) {
     digitalWrite(dir_pin, dir);
+}
+
+uint8_t Motor::guessDirection(void) {
+    uint8_t dir;
+    // Simetric position
+    uint16_t sim_pos = (currPosition + USTEPS_REV/2) % USTEPS_REV;
+    if (!isTarget()) {
+        dir = ((target > currPosition) && (target < sim_pos)) ? FW : BW;
+    }
+    else {
+        dir = ((target > currPosition) || (target < sim_pos)) ? FW : BW;
+    }
+    return dir;
 }
 
 void Motor::rotate(uint8_t step_dir) {

@@ -47,11 +47,23 @@ This library is implemented for its use in the SkyPointer project:
 // Modulus operator
 #define MOD(a, b) ((((a) % (b)) + (b)) % (b))
 
-void config_shield(void);   // Pin configuration
+
+class MotorShield {
+    public:
+        MotorShield(void);
+        uint8_t home;
+        void config(void);   // Pin configuration
+        
+    //private:
+};
+
+
 
 class Motor {
     public:
         Motor(uint8_t port_); // Uses the STEPS value
+        //friend class MotorShield;
+
         uint8_t port;
         uint8_t step_pin;
         uint8_t dir_pin;
@@ -69,6 +81,10 @@ class Motor {
     //private:
         uint16_t currPosition;
         uint16_t target;
+
+        uint8_t guessDirection(void);
+
+        //MotorShield shield; // MotorShield can now access Motor attributes
 };
 
 
