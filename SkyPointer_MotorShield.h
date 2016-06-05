@@ -15,9 +15,9 @@ This library is implemented for its use in the SkyPointer project:
 
 // Speed for develop and normal behaviour
 #ifdef DEBUG
-    #define DT 20000
+    #define DT 100000   // 100 ms
 #else
-    #define DT 100
+    #define DT 100      // 100 us
 #endif
 
 // Naming the axes (ports)
@@ -29,8 +29,8 @@ This library is implemented for its use in the SkyPointer project:
 #define MICROSTEPS 16
 #define USTEPS_REV STEPS*MICROSTEPS
 // Directions for rotations
-#define FW 0            // Forward
-#define BW 1            // Backward
+#define FW 1            // Forward
+#define BW 2            // Backward
 
 // Arduino pins
 #define XSTEP 2
@@ -43,6 +43,8 @@ This library is implemented for its use in the SkyPointer project:
 // Laser pins
 #define LASER_PIN_L 12
 #define LASER_PIN_H 13
+// Pin for the photo diode
+#define PHOTO_PIN A0
 
 // Modulus operator
 #define MOD(a, b) ((((a) % (b)) + (b)) % (b))
@@ -75,11 +77,11 @@ class Motor {
         uint16_t getTarget(void);
         bool isTarget();
 
-        void set_direction(uint8_t dir);
-        void rotate(uint8_t dir);
+        void set_direction(uint8_t);
+        void microstep(uint8_t);
 
     //private:
-        uint16_t currPosition;
+        uint16_t position;
         uint16_t target;
 
         uint8_t guessDirection(void);
