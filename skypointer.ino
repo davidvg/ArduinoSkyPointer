@@ -9,7 +9,7 @@ This library is implemented for its use in the SkyPointer project:
 
 *******************************************************************************/
 // If DEBUG is defined, DT = 20ms
-//#define DEBUG
+#define DEBUG
 
 #include "SkyPointer_MotorShield.h"
 
@@ -27,7 +27,23 @@ Motor DE = Motor(Y);
 
 
         /*** Interruptions ***/
-void ISR_rotate(void) {
+void ISR_timer() {
+    uint32_t t_on = MS.getTimeOn();
+    #ifdef DEBUG
+        Serial.print("Seconds to OFF: ");
+        Serial.println((LASER_T_ON-t_on)/1000000, DEC);
+    #endif
+    if(t_on >= LASER_T_ON) {
+        MS.laser(0);
+        Timer1.detachInterrupt();
+        #ifdef DEBUG
+            Serial.println("LASER OFF");
+        #endif
+    }
+    MS.setTimeOn(t_on + (uint32_t)DT);
+}
+
+void ISR_rotate() {
     uint8_t dir;
     // Azimuth motor
     if (!AZ.isTarget()){
@@ -51,13 +67,17 @@ void ISR_rotate(void) {
     }
     if (AZ.isTarget() && DE.isTarget()) {
         Timer1.detachInterrupt();
-        // TO-DO -- Laser Temporization
+        #ifdef DEBUG
+            Serial.println("ROTATION DONE");
+        #endif
+        MS.setTimeOn((uint32_t)(0));
+        Timer1.attachInterrupt(ISR_timer);
     }
 }
 
 
         /*** Serial Comunications ***/
-void ProcessGoto(void) {
+void ProcessGoto() {
     uint16_t tgt1, tgt2;
     tgt1 = MOD(atoi(sCmd.next()), USTEPS_REV);
     tgt2 = MOD(atoi(sCmd.next()), USTEPS_REV);
@@ -67,7 +87,7 @@ void ProcessGoto(void) {
     Timer1.attachInterrupt(ISR_rotate);
 }
 
-void ProcessMove(void) {
+void ProcessMove() {
     uint16_t tgt1, tgt2;
     tgt1 = MOD((int16_t)AZ.getPosition() + atoi(sCmd.next()), USTEPS_REV);
     tgt2 = MOD((int16_t)DE.getPosition() + atoi(sCmd.next()), USTEPS_REV);
@@ -77,17 +97,51 @@ void ProcessMove(void) {
     Timer1.attachInterrupt(ISR_rotate);
 }
 
-void ProcessStop(void) {
+void ProcessStop() {
     AZ.setTarget(AZ.getPosition());
     DE.setTarget(DE.getPosition());
     Serial.print("OK\r");
     Timer1.attachInterrupt(ISR_rotate);
 }
 
-void ProcessGetPos(void) {
+void ProcessGetPos() {
     char buf[13];
     sprintf(buf, "P %04d %04d\r", AZ.getPosition(), DE.getPosition());
     Serial.print(buf);
+}
+
+void ProcessHome() {
+
+}
+
+void ProcessLaser() {
+    uint8_t enable = atoi(sCmd.next()) != 0;
+    MS.laser(enable);
+    Serial.print("OK\r");
+    #ifdef DEBUG
+        if(enable) { Serial.println("LASER ON"); }
+        else { Serial.println("LASER OFF"); }
+    #endif
+}
+
+void ProcessID() {
+    Serial.print("SkyPointer 2.0\r");
+}
+
+void ProcessWriteCalib() {
+
+}
+
+void ProcessReadCalib() {
+
+}
+
+void ProcessQuit() {
+
+}
+
+void Unrecognized() {
+    Serial.print("NK\r");
 }
 
 
@@ -100,6 +154,13 @@ void setup () {
     sCmd.addCommand("M", ProcessMove);      // M rel1 rel2\r
     sCmd.addCommand("S", ProcessStop);      // S\r
     sCmd.addCommand("P", ProcessGetPos);    // P\r
+    sCmd.addCommand("H", ProcessHome);      // H\r
+    sCmd.addCommand("L", ProcessLaser);     // L enable\r
+    sCmd.addCommand("I", ProcessID);        // I\r
+    sCmd.addCommand("W", ProcessWriteCalib);//
+    sCmd.addCommand("R", ProcessReadCalib); //
+    sCmd.addCommand("Q", ProcessQuit);      // Q\r
+    sCmd.addDefaultHandler(Unrecognized);   // Unknown commands
 
     Serial.begin(115200);
     Timer1.initialize(DT);
@@ -108,12 +169,4 @@ void setup () {
 void loop () {
     // Wait for commands in the serial port
     sCmd.readSerial();
-    //AZ.setTarget(100);
-
-#ifdef DEBUG
-    // DEBUG
-    Serial.print("POS: ");
-    Serial.println(AZ.getPosition());
-#endif
-    //delayMicroseconds(DT);
 }

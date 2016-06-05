@@ -45,6 +45,8 @@ This library is implemented for its use in the SkyPointer project:
 #define LASER_PIN_H 13
 // Pin for the photo diode
 #define PHOTO_PIN A0
+// On time for laser
+#define LASER_T_ON  5000000 // 5 seconds
 
 // Modulus operator
 #define MOD(a, b) ((((a) % (b)) + (b)) % (b))
@@ -54,9 +56,13 @@ class MotorShield {
     public:
         MotorShield(void);
         uint8_t home;
-        void config(void);   // Pin configuration
+        void config(void);          // Pin configuration
+        void setTimeOn(uint32_t);   // Store elapsed ON time for laser
+        uint32_t getTimeOn(void);   // Get elapsed ON time for laser
+        void laser(uint8_t);        // Turn ON/OFF the laser
         
     //private:
+        uint32_t laser_t_on;        // Elapsed ON time for laser
 };
 
 

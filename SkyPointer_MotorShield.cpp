@@ -12,11 +12,25 @@ Date:      2016/May/26
 // Shield class
 MotorShield::MotorShield(void) {
     home = false;
+    laser_t_on = 0;
 }
 
 void MotorShield::config(void) {
     pinMode(ENABLE, OUTPUT); 
     digitalWrite(ENABLE, LOW); 
+}
+
+void MotorShield::setTimeOn(uint32_t t) {
+    laser_t_on = t;
+}
+
+uint32_t MotorShield::getTimeOn(void) {
+    return laser_t_on;
+}
+
+void MotorShield::laser(uint8_t enable) {
+    digitalWrite(LASER_PIN_H, enable);
+    digitalWrite(LASER_PIN_L, !enable);
 }
 
 
