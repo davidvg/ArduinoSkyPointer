@@ -90,7 +90,7 @@ uint8_t Motor::guessDirection(void) {
 }
 
 void Motor::microstep(uint8_t step_dir) {
-// Send a HIGH pulse to the port step pin.
+    // Send a HIGH pulse to the port step pin.
     if (step_dir == FW) {
         position++;
     }
@@ -101,10 +101,9 @@ void Motor::microstep(uint8_t step_dir) {
         else {
             position--;
         }
-    // Check range
-    position += USTEPS_REV;
-    position %= USTEPS_REV;
     }
+    // Check range
+    position = MOD(position, USTEPS_REV);
     // Rotate
     digitalWrite(step_pin, HIGH);
     digitalWrite(step_pin, LOW);

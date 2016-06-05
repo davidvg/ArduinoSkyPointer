@@ -10,7 +10,6 @@ This library is implemented for its use in the SkyPointer project:
 *******************************************************************************/
 // If DEBUG is defined, DT = 20ms
 #define DEBUG
-#define DEBUG_DIR
 
 #include "SkyPointer_MotorShield.h"
 
@@ -60,7 +59,12 @@ void ISR_rotate(void) {
         /*** Serial Comunications ***/
 void ProcessGoto(void) {
     uint16_t tgt1, tgt2;
-    //tgt1 = 
+    tgt1 = MOD(atoi(sCmd.next()), USTEPS_REV);
+    tgt2 = MOD(atoi(sCmd.next()), USTEPS_REV);
+    AZ.setTarget(tgt1);
+    DE.setTarget(tgt2);
+    Serial.print("OK\r");
+    Timer1.attachInterrupt(ISR_rotate);
 }
 
 
@@ -68,21 +72,22 @@ void ProcessGoto(void) {
 void setup () {
     MS.config();  // Configure pins
 
+    // Protocol Commands
+    sCmd.addCommand("G", ProcessGoto);  // G pos1 pos2\r    
+
     Serial.begin(115200);
     Timer1.initialize(DT);
-    Timer1.attachInterrupt(ISR_rotate);
 }
 
 void loop () {
     // Wait for commands in the serial port
-    //sCmd.readSerial();
-    AZ.setTarget(3100);
+    sCmd.readSerial();
+    //AZ.setTarget(100);
 
 #ifdef DEBUG
     // DEBUG
-    uint16_t pos = AZ.getPosition();
-    //Serial.print("POS: ");
-    //Serial.println(pos, DEC);
+    Serial.print("POS: ");
+    Serial.println(AZ.getPosition());
 #endif
-    delayMicroseconds(DT);
+    //delayMicroseconds(DT);
 }
