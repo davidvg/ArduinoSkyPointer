@@ -9,7 +9,7 @@ This library is implemented for its use in the SkyPointer project:
 
 *******************************************************************************/
 // If DEBUG is defined, DT = 20ms
-#define DEBUG
+//#define DEBUG
 
 #include "SkyPointer_MotorShield.h"
 
@@ -67,13 +67,39 @@ void ProcessGoto(void) {
     Timer1.attachInterrupt(ISR_rotate);
 }
 
+void ProcessMove(void) {
+    uint16_t tgt1, tgt2;
+    tgt1 = MOD((int16_t)AZ.getPosition() + atoi(sCmd.next()), USTEPS_REV);
+    tgt2 = MOD((int16_t)DE.getPosition() + atoi(sCmd.next()), USTEPS_REV);
+    AZ.setTarget(tgt1);
+    DE.setTarget(tgt2);
+    Serial.print("OK\r");
+    Timer1.attachInterrupt(ISR_rotate);
+}
+
+void ProcessStop(void) {
+    AZ.setTarget(AZ.getPosition());
+    DE.setTarget(DE.getPosition());
+    Serial.print("OK\r");
+    Timer1.attachInterrupt(ISR_rotate);
+}
+
+void ProcessGetPos(void) {
+    char buf[13];
+    sprintf(buf, "P %04d %04d\r", AZ.getPosition(), DE.getPosition());
+    Serial.print(buf);
+}
+
 
         /*** Main Program ***/
 void setup () {
     MS.config();  // Configure pins
 
     // Protocol Commands
-    sCmd.addCommand("G", ProcessGoto);  // G pos1 pos2\r    
+    sCmd.addCommand("G", ProcessGoto);      // G pos1 pos2\r    
+    sCmd.addCommand("M", ProcessMove);      // M rel1 rel2\r
+    sCmd.addCommand("S", ProcessStop);      // S\r
+    sCmd.addCommand("P", ProcessGetPos);    // P\r
 
     Serial.begin(115200);
     Timer1.initialize(DT);
