@@ -23,7 +23,7 @@ SerialCommand sCmd;
 MotorShield MS = MotorShield();
 // Motor for Azimut axis
 Motor AZ = Motor(X);
-Motor DE = Motor(Y);
+Motor ALT = Motor(Y);
 
 
         /*** Interruptions ***/
@@ -53,19 +53,19 @@ void ISR_rotate() {
     // Declinatin motor
     if (MS.home) {
         if (analogRead(PHOTO_PIN < 512)) {
-            DE.microstep(BW);
+            ALT.microstep(BW);
         }    
         else {
-            DE.setPosition(0);
+            ALT.setPosition(0);
         }
     }
     else{
-        if (!DE.isTarget()) {
-            dir = DE.guessDirection();
-            DE.microstep(dir);
+        if (!ALT.isTarget()) {
+            dir = ALT.guessDirection();
+            ALT.microstep(dir);
         }
     }
-    if (AZ.isTarget() && DE.isTarget()) {
+    if (AZ.isTarget() && ALT.isTarget()) {
         Timer1.detachInterrupt();
         #ifdef DEBUG
             Serial.println("ROTATION DONE");
@@ -82,7 +82,7 @@ void ProcessGoto() {
     tgt1 = MOD(atoi(sCmd.next()), USTEPS_REV);
     tgt2 = MOD(atoi(sCmd.next()), USTEPS_REV);
     AZ.setTarget(tgt1);
-    DE.setTarget(tgt2);
+    ALT.setTarget(tgt2);
     Serial.print("OK\r");
     Timer1.attachInterrupt(ISR_rotate);
 }
@@ -90,23 +90,23 @@ void ProcessGoto() {
 void ProcessMove() {
     uint16_t tgt1, tgt2;
     tgt1 = MOD((int16_t)AZ.getPosition() + atoi(sCmd.next()), USTEPS_REV);
-    tgt2 = MOD((int16_t)DE.getPosition() + atoi(sCmd.next()), USTEPS_REV);
+    tgt2 = MOD((int16_t)ALT.getPosition() + atoi(sCmd.next()), USTEPS_REV);
     AZ.setTarget(tgt1);
-    DE.setTarget(tgt2);
+    ALT.setTarget(tgt2);
     Serial.print("OK\r");
     Timer1.attachInterrupt(ISR_rotate);
 }
 
 void ProcessStop() {
     AZ.setTarget(AZ.getPosition());
-    DE.setTarget(DE.getPosition());
+    ALT.setTarget(ALT.getPosition());
     Serial.print("OK\r");
     Timer1.attachInterrupt(ISR_rotate);
 }
 
 void ProcessGetPos() {
     char buf[13];
-    sprintf(buf, "P %04d %04d\r", AZ.getPosition(), DE.getPosition());
+    sprintf(buf, "P %04d %04d\r", AZ.getPosition(), ALT.getPosition());
     Serial.print(buf);
 }
 

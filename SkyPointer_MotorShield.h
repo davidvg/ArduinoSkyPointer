@@ -40,6 +40,9 @@ This library is implemented for its use in the SkyPointer project:
 #define YDIR 6
 #define ZDIR 7
 #define ENABLE 8
+#define XSTOP 9
+#define YSTOP 10
+#define ZSTOP 11
 // Laser pins
 #define LASER_PIN_L 12
 #define LASER_PIN_H 13
@@ -70,11 +73,6 @@ class MotorShield {
 class Motor {
     public:
         Motor(uint8_t port_); // Uses the STEPS value
-        //friend class MotorShield;
-
-        uint8_t port;
-        uint8_t step_pin;
-        uint8_t dir_pin;
 
         void init(void);
         void setPosition(uint16_t);
@@ -83,16 +81,18 @@ class Motor {
         uint16_t getTarget(void);
         bool isTarget();
 
-        void set_direction(uint8_t);
+        void setDirection(uint8_t);
         void microstep(uint8_t);
 
     //private:
+        uint8_t port;
+        uint8_t step_pin;
+        uint8_t dir_pin;
+
         uint16_t position;
         uint16_t target;
 
         uint8_t guessDirection(void);
-
-        //MotorShield shield; // MotorShield can now access Motor attributes
 };
 
 

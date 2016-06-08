@@ -18,6 +18,10 @@ MotorShield::MotorShield(void) {
 void MotorShield::config(void) {
     pinMode(ENABLE, OUTPUT); 
     digitalWrite(ENABLE, LOW); 
+
+    pinMode(LASER_PIN_H, OUTPUT);
+    pinMode(LASER_PIN_L, OUTPUT);
+    laser(0);
 }
 
 void MotorShield::setTimeOn(uint32_t t) {
@@ -37,8 +41,6 @@ void MotorShield::laser(uint8_t enable) {
 // Motor Class
 Motor::Motor(uint8_t port_) {
     port = port_;
-    step_pin = 0;
-    dir_pin = 0;
 
     target = 0;
     position = 0;
@@ -86,7 +88,7 @@ bool Motor::isTarget(void) {
     return (position == target);
 }
 
-void Motor::set_direction(uint8_t dir) {
+void Motor::setDirection(uint8_t dir) {
     digitalWrite(dir_pin, dir);
 }
 
