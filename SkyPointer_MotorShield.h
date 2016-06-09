@@ -74,7 +74,6 @@ class Motor {
     public:
         Motor(uint8_t port_); 
 
-        void init(void);
         void setPosition(uint16_t);
         uint16_t getPosition(void);
         void setTarget(uint16_t);

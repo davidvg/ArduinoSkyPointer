@@ -47,10 +47,6 @@ Motor::Motor(uint8_t port_) {
     position = 0;
 
     // Configure motor pins
-    init();
-}
-
-void Motor::init(void) {
     switch(port) {
         case 0:
             step_pin = XSTEP;
