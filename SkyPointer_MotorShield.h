@@ -29,8 +29,8 @@ This library is implemented for its use in the SkyPointer project:
 #define MICROSTEPS 16
 #define USTEPS_REV STEPS*MICROSTEPS
 // Directions for rotations
-#define FW 1            // Forward
-#define BW 2            // Backward
+#define FW 0            // Forward
+#define BW 1            // Backward
 
 // Arduino pins
 #define XSTEP 2
@@ -49,7 +49,7 @@ This library is implemented for its use in the SkyPointer project:
 // Pin for the photo diode
 #define PHOTO_PIN A0
 // On time for laser
-#define LASER_T_ON  5000000 // 5 seconds
+#define LASER_ON_TIME  5000000 // 5 seconds
 
 // Modulus operator
 #define MOD(a, b) ((((a) % (b)) + (b)) % (b))
@@ -65,14 +65,14 @@ class MotorShield {
         void laser(uint8_t);        // Turn ON/OFF the laser
         
     //private:
-        uint32_t laser_t_on;        // Elapsed ON time for laser
+        uint32_t laserOnTime;        // Elapsed ON time for laser
 };
 
 
 
 class Motor {
     public:
-        Motor(uint8_t port_); // Uses the STEPS value
+        Motor(uint8_t port_); 
 
         void init(void);
         void setPosition(uint16_t);

@@ -12,24 +12,25 @@ Date:      2016/May/26
 // Shield class
 MotorShield::MotorShield(void) {
     home = false;
-    laser_t_on = 0;
+    laserOnTime = 0;
 }
 
 void MotorShield::config(void) {
+    // Enable pin
     pinMode(ENABLE, OUTPUT); 
     digitalWrite(ENABLE, LOW); 
-
+    // Laser pins
     pinMode(LASER_PIN_H, OUTPUT);
     pinMode(LASER_PIN_L, OUTPUT);
     laser(0);
 }
 
 void MotorShield::setTimeOn(uint32_t t) {
-    laser_t_on = t;
+    laserOnTime = t;
 }
 
 uint32_t MotorShield::getTimeOn(void) {
-    return laser_t_on;
+    return laserOnTime;
 }
 
 void MotorShield::laser(uint8_t enable) {
@@ -62,6 +63,10 @@ void Motor::init(void) {
         case 2:
             step_pin = ZSTEP;
             dir_pin = ZDIR;
+            break;
+        default:    // Use X port if any other
+            step_pin = XSTEP;
+            dir_pin = XDIR;
             break;
     }
     pinMode(step_pin, OUTPUT);
@@ -106,7 +111,12 @@ uint8_t Motor::guessDirection(void) {
 }
 
 void Motor::microstep(uint8_t step_dir) {
-    // Send a HIGH pulse to the port step pin.
+    // Set direction pin
+    setDirection(step_dir);
+    // Rotate 1 microstep
+    digitalWrite(step_pin, HIGH);
+    digitalWrite(step_pin, LOW);
+    // Update position calculations
     if (step_dir == FW) {
         position++;
     }
@@ -120,7 +130,4 @@ void Motor::microstep(uint8_t step_dir) {
     }
     // Check range
     position = MOD(position, USTEPS_REV);
-    // Rotate
-    digitalWrite(step_pin, HIGH);
-    digitalWrite(step_pin, LOW);
 }

@@ -8,7 +8,6 @@ This library is implemented for its use in the SkyPointer project:
     https://github.com/juanmb/skypointer
 
 *******************************************************************************/
-// If DEBUG is defined, DT = 20ms
 #define DEBUG
 
 #include "SkyPointer_MotorShield.h"
@@ -21,7 +20,7 @@ This library is implemented for its use in the SkyPointer project:
 SerialCommand sCmd;
 // Shield
 MotorShield MS = MotorShield();
-// Motor for Azimut axis
+// Motors
 Motor AZ = Motor(X);
 Motor ALT = Motor(Y);
 
@@ -29,11 +28,7 @@ Motor ALT = Motor(Y);
         /*** Interruptions ***/
 void ISR_timer() {
     uint32_t t_on = MS.getTimeOn();
-    #ifdef DEBUG
-        Serial.print("Seconds to OFF: ");
-        Serial.println((LASER_T_ON-t_on)/1000000, DEC);
-    #endif
-    if(t_on >= LASER_T_ON) {
+    if(t_on >= LASER_ON_TIME) {
         MS.laser(0);
         Timer1.detachInterrupt();
         #ifdef DEBUG
@@ -50,7 +45,7 @@ void ISR_rotate() {
         dir = AZ.guessDirection();
         AZ.microstep(dir);
     }
-    // Declinatin motor
+    // Altitude motor
     if (MS.home) {
         if (analogRead(PHOTO_PIN < 512)) {
             ALT.microstep(BW);
@@ -65,6 +60,9 @@ void ISR_rotate() {
             ALT.microstep(dir);
         }
     }
+    #ifdef DEBUG
+        Serial.println(AZ.getPosition(), DEC);
+    #endif
     if (AZ.isTarget() && ALT.isTarget()) {
         Timer1.detachInterrupt();
         #ifdef DEBUG
@@ -119,8 +117,8 @@ void ProcessLaser() {
     MS.laser(enable);
     Serial.print("OK\r");
     #ifdef DEBUG
-        if(enable) { Serial.println("LASER ON"); }
-        else { Serial.println("LASER OFF"); }
+        //if(enable) { Serial.println("LASER ON"); }
+        //else { Serial.println("LASER OFF"); }
     #endif
 }
 
