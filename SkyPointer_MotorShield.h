@@ -64,8 +64,8 @@ class MotorShield {
         uint32_t getTimeOn(void);   // Get elapsed ON time for laser
         void laser(uint8_t);        // Turn ON/OFF the laser
         
-    //private:
-        uint32_t laserOnTime;        // Elapsed ON time for laser
+    private:
+        uint32_t laserOnTime;       // Elapsed ON time for laser
 };
 
 
@@ -73,25 +73,29 @@ class MotorShield {
 class Motor {
     public:
         Motor(uint8_t port_); 
-
+         
         void setPosition(uint16_t);
         uint16_t getPosition(void);
+
         void setTarget(uint16_t);
         uint16_t getTarget(void);
         bool isTarget();
 
         void setDirection(uint8_t);
+        uint8_t getDirection(void);
+
         void microstep(uint8_t);
 
-    //private:
+    private:
         uint8_t port;
         uint8_t step_pin;
         uint8_t dir_pin;
 
         uint16_t position;
         uint16_t target;
-
-        uint8_t guessDirection(void);
+        uint8_t direction;          // Direction for rotation. It allows to read
+                                    // the direction from the class, or to
+                                    // specify it for standalone microstep calls
 };
 
 

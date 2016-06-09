@@ -39,11 +39,9 @@ void ISR_timer() {
 }
 
 void ISR_rotate() {
-    uint8_t dir;
     // Azimuth motor
     if (!AZ.isTarget()){
-        dir = AZ.guessDirection();
-        AZ.microstep(dir);
+        AZ.microstep(AZ.getDirection());
     }
     // Altitude motor
     if (MS.home) {
@@ -56,8 +54,7 @@ void ISR_rotate() {
     }
     else{
         if (!ALT.isTarget()) {
-            dir = ALT.guessDirection();
-            ALT.microstep(dir);
+            ALT.microstep(ALT.getDirection());
         }
     }
     #ifdef DEBUG

@@ -45,6 +45,7 @@ Motor::Motor(uint8_t port_) {
 
     target = 0;
     position = 0;
+    direction = FW;
 
     // Configure motor pins
     switch(port) {
@@ -79,6 +80,14 @@ uint16_t Motor::getPosition(void) {
 
 void Motor::setTarget(uint16_t tgt) {
     target = tgt;
+    // Guess the direction to rotate and store in the Motor class
+    uint16_t sim_pos = MOD(position + USTEPS_REV/2, USTEPS_REV);
+    if (position < USTEPS_REV/2) {
+        direction = ((target > position) && (target < sim_pos)) ? FW : BW;
+    }
+    else {
+        direction = ((target > position) || (target < sim_pos)) ? FW : BW;
+    }
 }
 
 uint16_t Motor::getTarget(void) {
@@ -93,23 +102,14 @@ void Motor::setDirection(uint8_t dir) {
     digitalWrite(dir_pin, dir);
 }
 
-uint8_t Motor::guessDirection(void) {
-    uint8_t dir;
-    // Simetric position
-    uint16_t sim_pos = MOD(position + USTEPS_REV/2, USTEPS_REV);
-    if (position < USTEPS_REV/2) {
-        dir = ((target > position) && (target < sim_pos)) ? FW : BW;
-    }
-    else {
-        dir = ((target > position) || (target < sim_pos)) ? FW : BW;
-    }
-    return dir;
+uint8_t Motor::getDirection(void) {
+    return direction;
 }
 
 void Motor::microstep(uint8_t step_dir) {
     // Set direction pin
     setDirection(step_dir);
-    // Rotate 1 microstep
+    // Rotate 1 microstep by sending a HIGH pulse to the STEP pin
     digitalWrite(step_pin, HIGH);
     digitalWrite(step_pin, LOW);
     // Update position calculations
@@ -124,6 +124,5 @@ void Motor::microstep(uint8_t step_dir) {
             position--;
         }
     }
-    // Check range
     position = MOD(position, USTEPS_REV);
 }
