@@ -8,7 +8,7 @@
 # 	https://github.com/sudar/Arduino-Makefile
 
 BOARD_TAG    = uno
-ARDUINO_LIBS = SoftwareSerial SoftwareSerial SerialCommand TimerOne
+ARDUINO_LIBS = SoftwareSerial SoftwareSerial SerialCommand TimerOne AccelStepper
 ARDUINO_PORT = /dev/ttyACM0
 
 include ~/src/Arduino-Makefile/Arduino.mk
