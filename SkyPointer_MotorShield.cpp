@@ -8,6 +8,7 @@ Date:      2016/May/26
 #include "Arduino.h"
 
 #include "SkyPointer_MotorShield.h"
+#include <AccelStepper.h>
 
 // Shield class
 MotorShield::MotorShield(void) {
@@ -39,6 +40,7 @@ void MotorShield::laser(uint8_t enable) {
 }
 
 
+/*
 // Motor Class
 Motor::Motor(uint8_t port_) {
     port = port_;
@@ -126,3 +128,4 @@ void Motor::microstep(uint8_t step_dir) {
     }
     position = MOD(position, USTEPS_REV);
 }
+*/

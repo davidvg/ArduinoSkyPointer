@@ -13,12 +13,9 @@ This library is implemented for its use in the SkyPointer project:
 
 #include <inttypes.h>
 
-// Speed for develop and normal behaviour
-#ifdef DEBUG
-    #define DT 100000   // 100 ms
-#else
-    #define DT 100      // 100 us
-#endif
+// Speed 
+#define MAX_SPEED 4000
+#define ACCEL 1000
 
 // Naming the axes (ports)
 #define X 0
@@ -50,6 +47,8 @@ This library is implemented for its use in the SkyPointer project:
 #define PHOTO_PIN A0
 // On time for laser
 #define LASER_ON_TIME  5000000 // 5 seconds
+// Baud Rate
+#define BAUDRATE 115200
 
 // Modulus operator
 #define MOD(a, b) ((((a) % (b)) + (b)) % (b))
@@ -69,11 +68,11 @@ class MotorShield {
 };
 
 
-
+/*
 class Motor {
     public:
         Motor(uint8_t port_); 
-         
+        
         void setPosition(uint16_t);
         uint16_t getPosition(void);
 
@@ -97,6 +96,6 @@ class Motor {
                                     // the direction from the class, or to
                                     // specify it for standalone microstep calls
 };
-
+*/
 
 #endif
