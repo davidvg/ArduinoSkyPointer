@@ -15,7 +15,7 @@ This library is implemented for its use in the SkyPointer project:
 
 // Speed 
 #define MAX_SPEED 4000
-#define ACCEL 1000
+#define ACCEL 3000
 
 // Naming the axes (ports)
 #define X 0

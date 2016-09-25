@@ -1,10 +1,5 @@
-#include <AccelStepper.h>
 #include <SerialCommand.h>
 #include "SkyPointer_MotorShield.h"
-
-#define XSTEP 2
-#define XDIR 5
-#define ENABLE 8
 
 MotorShield shield = MotorShield();
 
