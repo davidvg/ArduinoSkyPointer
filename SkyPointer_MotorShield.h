@@ -12,10 +12,16 @@ This library is implemented for its use in the SkyPointer project:
 #define _SkyPointer_MotorShield_h_
 
 #include <inttypes.h>
+#include <AccelStepper.h>
 
 // Speed 
-#define MAX_SPEED 4000
-#define ACCEL 3000
+#ifdef DEBUG
+    #define MAX_SPEED 100
+    #define ACCEL 300
+#else
+    #define MAX_SPEED 4000
+    #define ACCEL 3000
+#endif
 
 // Naming the axes (ports)
 #define X 0
