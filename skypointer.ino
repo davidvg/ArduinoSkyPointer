@@ -1,10 +1,7 @@
-//#define DEBUG
-
-
-//#include <AccelStepper.h>
 #include <SerialCommand.h>
 #include "SkyPointer_MotorShield.h"
- 
+
+
 MotorShield shield = MotorShield();
 
 AccelStepper AZ(AccelStepper::DRIVER, XSTEP, XDIR);
