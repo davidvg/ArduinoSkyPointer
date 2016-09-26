@@ -18,7 +18,7 @@ As in the original Adafruit library, there is a `utility` folder, that includes 
 ## How to use the library
 Here appears the code **specific to this library** to use it. Other necessary code is not shown.
 
-#### Defining the elements
+### Defining the elements
 
 First thing to do is to include the library in the Arduino sketch:
 ```C++
@@ -44,7 +44,7 @@ void setup () {
 ```
 
 
-#### Making it work
+### Making it work
 
 We can set a target position calling the `setTarget()` method:
 
@@ -72,6 +72,6 @@ The current motor position can be accesed at any moment calling the `getPosition
 curr_pos = motor -> getPosition();
 ```
 
-#### More features...
+### More features...
 
 The SkyPointer for which this library was written also has a laser that must be turned on and off. This can be done calling the `laser()` method, which takes as argument a `1` (`true`) to turn the laser on and a `0` (`false`) to turn it off. This can be used to handle any other hardware that meets the same specifications (more on this can be found in the code)
