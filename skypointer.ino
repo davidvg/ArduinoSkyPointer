@@ -71,6 +71,15 @@ void ProcessGoto() {
     Serial.print("OK\r");
 }
 
+void ProcessGetPos() {
+    char buff[13];
+    uint16_t pos1, pos2;
+    pos1 = MOD(AZ.currentPosition(), USTEPS_REV);
+    pos2 = MOD(ALT.currentPosition(), USTEPS_REV);
+    sprintf(buff, "P %04d %04d\r", pos1, pos2);
+    Serial.print(buff);
+}
+
 void Unrecognized() {
     Serial.print("NK\r");
 }
@@ -91,6 +100,7 @@ void setup() {
     ALT.setEnablePin(ENABLE);
 
     sCmd.addCommand("G", ProcessGoto);
+    sCmd.addCommand("P", ProcessGetPos);
     sCmd.addDefaultHandler(Unrecognized);
     
     Serial.begin(BAUDRATE);
@@ -100,5 +110,5 @@ void loop() {
     sCmd.readSerial();
     AZ.run();
     ALT.run();
-    
+    //Serial.println(MOD(AZ.currentPosition(), USTEPS_REV), DEC);    
 }
