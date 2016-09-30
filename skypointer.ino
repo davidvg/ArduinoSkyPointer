@@ -9,6 +9,7 @@ AccelStepper ALT(AccelStepper::DRIVER, YSTEP, YDIR);
 
 SerialCommand sCmd;
 
+// Functions for SerialCommand
 void ProcessGoto() {
     uint16_t pos, simPos, tgt1, tgt2;
     int16_t delta1, delta2; // SIGNED
@@ -71,6 +72,17 @@ void ProcessGoto() {
     Serial.print("OK\r");
 }
 
+void ProcessMove() {
+    int16_t tgt1, tgt2;
+    tgt1 = atoi(sCmd.next());
+    tgt2 = atoi(sCmd.next());
+
+    AZ.move(tgt1);
+    ALT.move(tgt2);
+    Serial.print("OK\r");
+
+}
+
 void ProcessGetPos() {
     char buff[13];
     uint16_t pos1, pos2;
@@ -99,8 +111,9 @@ void setup() {
     ALT.setAcceleration(ACCEL);
     ALT.setEnablePin(ENABLE);
 
-    sCmd.addCommand("G", ProcessGoto);
-    sCmd.addCommand("P", ProcessGetPos);
+    sCmd.addCommand("G", ProcessGoto);    // G XXXX YYYY\r
+    sCmd.addCommand("M", ProcessMove);
+    sCmd.addCommand("P", ProcessGetPos);  // P\r
     sCmd.addDefaultHandler(Unrecognized);
     
     Serial.begin(BAUDRATE);
