@@ -21,8 +21,7 @@ void MotorShield::config(void) {
     pinMode(ENABLE, OUTPUT); 
     digitalWrite(ENABLE, LOW); 
     // Laser pins
-    pinMode(LASER_PIN_H, OUTPUT);
-    pinMode(LASER_PIN_L, OUTPUT);
+    pinMode(LASER_PIN, OUTPUT);
     laser(0);
 }
 
@@ -35,8 +34,7 @@ uint32_t MotorShield::getTimeOn(void) {
 }
 
 void MotorShield::laser(uint8_t enable) {
-    digitalWrite(LASER_PIN_H, enable);
-    digitalWrite(LASER_PIN_L, !enable);
+    digitalWrite(LASER_PIN, enable);
 }
 
 

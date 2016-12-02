@@ -46,11 +46,13 @@ This library is implemented for its use in the SkyPointer project:
 #define XSTOP 9
 #define YSTOP 10
 #define ZSTOP 11
-// Laser pins
-#define LASER_PIN_L 12
-#define LASER_PIN_H 13
+
+#define SPINDLE_ENABLE 12  // Spindle Enable pin
+#define SPINDLE_DIR 13     // Spindle Direction pin
 // Pin for the photo diode
 #define PHOTO_PIN A0
+// Define pin for laser
+#define LASER_PIN ZDIR
 // On time for laser
 #define LASER_ON_TIME  5000000 // 5 seconds
 // Baud Rate

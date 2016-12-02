@@ -1,7 +1,6 @@
 #include <SerialCommand.h>
 #include "SkyPointer_MotorShield.h"
 
-
 MotorShield shield = MotorShield();
 
 AccelStepper AZ(AccelStepper::DRIVER, XSTEP, XDIR);
@@ -68,7 +67,6 @@ void ProcessGoto() {
     }
     // Rotate ALT motor 
     ALT.move(delta1);
-
     Serial.print("OK\r");
 }
 
@@ -92,6 +90,12 @@ void ProcessGetPos() {
     Serial.print(buff);
 }
 
+void ProcessLaser() {
+    uint8_t enable = atoi(sCmd.next()) != 0;
+    shield.laser(enable);
+    Serial.print("OK\r");
+}
+
 void Unrecognized() {
     Serial.print("NK\r");
 }
@@ -112,8 +116,9 @@ void setup() {
     ALT.setEnablePin(ENABLE);
 
     sCmd.addCommand("G", ProcessGoto);    // G XXXX YYYY\r
-    sCmd.addCommand("M", ProcessMove);
+    sCmd.addCommand("M", ProcessMove);    // M XXXX YYYY\r
     sCmd.addCommand("P", ProcessGetPos);  // P\r
+    sCmd.addCommand("L", ProcessLaser);
     sCmd.addDefaultHandler(Unrecognized);
     
     Serial.begin(BAUDRATE);
