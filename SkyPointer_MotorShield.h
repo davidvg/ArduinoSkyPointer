@@ -46,12 +46,12 @@ This library is implemented for its use in the SkyPointer project:
 #define XSTOP 9
 #define YSTOP 10
 #define ZSTOP 11
+#define SPINDLE_ENABLE 12  
+#define SPINDLE_DIR 13
 
-#define SPINDLE_ENABLE 12  // Spindle Enable pin
-#define SPINDLE_DIR 13     // Spindle Direction pin
-// Pin for the photo diode
-#define PHOTO_PIN A0
-// Define pin for laser
+// Pin for the photo diode -- Map to ZSTEP
+#define PHOTO_PIN ZSTEP
+// Pin for the laser -- Map to ZDIR
 #define LASER_PIN ZDIR
 // On time for laser
 #define LASER_ON_TIME  5000000 // 5 seconds
@@ -66,7 +66,7 @@ class MotorShield {
     public:
         MotorShield(void);
         uint8_t home;
-        void config(void);          // Pin configuration
+        void init(void);          // Pin configuration
         void setTimeOn(uint32_t);   // Store elapsed ON time for laser
         uint32_t getTimeOn(void);   // Get elapsed ON time for laser
         void laser(uint8_t);        // Turn ON/OFF the laser

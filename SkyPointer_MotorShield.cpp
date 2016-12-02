@@ -16,12 +16,20 @@ MotorShield::MotorShield(void) {
     laserOnTime = 0;
 }
 
-void MotorShield::config(void) {
+void MotorShield::init(void) {
     // Enable pin
     pinMode(ENABLE, OUTPUT); 
     digitalWrite(ENABLE, LOW); 
-    // Laser pins
+    // Configure outputs
+    pinMode(XSTEP, OUTPUT);
+    pinMode(XDIR, OUTPUT);
+    pinMode(YSTEP, OUTPUT);
+    pinMode(YDIR, OUTPUT);
+    // Laser pin
     pinMode(LASER_PIN, OUTPUT);
+    // Photo diode pin
+    pinMode(PHOTO_PIN, INPUT);
+    // Switch laser off at start
     laser(0);
 }
 
@@ -34,7 +42,8 @@ uint32_t MotorShield::getTimeOn(void) {
 }
 
 void MotorShield::laser(uint8_t enable) {
-    digitalWrite(LASER_PIN, enable);
+    // Inverted logic: 0 switches laser on, 1 switches it off
+    digitalWrite(LASER_PIN, !enable);
 }
 
 

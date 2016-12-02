@@ -101,10 +101,10 @@ void Unrecognized() {
 }
 
 void setup() {
-    pinMode(XSTEP, OUTPUT);
-    pinMode(XDIR, OUTPUT);
-    //pinMode(ENABLE, OUTPUT);
-    
+    // Configure pins and turn laser off
+    shield.init();
+
+    // Configure axes logic and dinamics 
     AZ.setPinsInverted(false, false, true);
     AZ.setMaxSpeed(MAX_SPEED);
     AZ.setAcceleration(ACCEL);
@@ -115,10 +115,11 @@ void setup() {
     ALT.setAcceleration(ACCEL);
     ALT.setEnablePin(ENABLE);
 
+    // SerialCommand
     sCmd.addCommand("G", ProcessGoto);    // G XXXX YYYY\r
     sCmd.addCommand("M", ProcessMove);    // M XXXX YYYY\r
     sCmd.addCommand("P", ProcessGetPos);  // P\r
-    sCmd.addCommand("L", ProcessLaser);
+    sCmd.addCommand("L", ProcessLaser);   // L enable\r
     sCmd.addDefaultHandler(Unrecognized);
     
     Serial.begin(BAUDRATE);
