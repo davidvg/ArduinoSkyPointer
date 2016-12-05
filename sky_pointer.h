@@ -8,19 +8,19 @@ This library is implemented for its use in the SkyPointer project:
     https://github.com/juanmb/skypointer
 
 *******************************************************************************/
-#ifndef _SkyPointer_MotorShield_h_
-#define _SkyPointer_MotorShield_h_
+#ifndef _SkyPointer_h_
+#define _SkyPointer_h_
 
 #include <inttypes.h>
-#include <AccelStepper.h>
+#include "AccelStepper.h"
 
-// Speed 
+// Speed
 #ifdef DEBUG
-    #define MAX_SPEED 100
+   #define MAX_SPEED 100
     #define ACCEL 300
 #else
-    #define MAX_SPEED 4000
-    #define ACCEL 3000
+    #define MAX_SPEED 6000
+    #define ACCEL 4000
 #endif
 
 // Naming the axes (ports)
@@ -35,7 +35,7 @@ This library is implemented for its use in the SkyPointer project:
 #define FW 0            // Forward
 #define BW 1            // Backward
 
-// Arduino pins
+// CNC Shield pins
 #define XSTEP 2
 #define YSTEP 3
 #define ZSTEP 4
@@ -46,7 +46,7 @@ This library is implemented for its use in the SkyPointer project:
 #define XSTOP 9
 #define YSTOP 10
 #define ZSTOP 11
-#define SPINDLE_ENABLE 12  
+#define SPINDLE_ENABLE 12
 #define SPINDLE_DIR 13
 
 // Pin for the photo diode -- Map to ZSTEP
@@ -62,48 +62,25 @@ This library is implemented for its use in the SkyPointer project:
 #define MOD(a, b) ((((a) % (b)) + (b)) % (b))
 
 
-class MotorShield {
+class SkyPointer {
     public:
-        MotorShield(void);
-        uint8_t home;
-        void init(void);          // Pin configuration
+        SkyPointer(void);
+        void init(void);            // Initialize the hardware
+        void run(void);
+        void laser(uint8_t);        // Turn ON/OFF the laser
+        void move(int16_t az, int16_t alt);
+        void goTo(uint16_t az, uint16_t alt);
+        void getPos(uint16_t *az, uint16_t *alt);
+        void stop();                // Stop both motors
+        void releaseMotors();       // Disable the motor drivers
         void setTimeOn(uint32_t);   // Store elapsed ON time for laser
         uint32_t getTimeOn(void);   // Get elapsed ON time for laser
-        void laser(uint8_t);        // Turn ON/OFF the laser
-        
+
     private:
+        uint8_t home;
         uint32_t laserOnTime;       // Elapsed ON time for laser
+        AccelStepper azMotor;
+        AccelStepper altMotor;
 };
-
-
-/*
-class Motor {
-    public:
-        Motor(uint8_t port_); 
-        
-        void setPosition(uint16_t);
-        uint16_t getPosition(void);
-
-        void setTarget(uint16_t);
-        uint16_t getTarget(void);
-        bool isTarget();
-
-        void setDirection(uint8_t);
-        uint8_t getDirection(void);
-
-        void microstep(uint8_t);
-
-    private:
-        uint8_t port;
-        uint8_t step_pin;
-        uint8_t dir_pin;
-
-        uint16_t position;
-        uint16_t target;
-        uint8_t direction;          // Direction for rotation. It allows to read
-                                    // the direction from the class, or to
-                                    // specify it for standalone microstep calls
-};
-*/
 
 #endif
