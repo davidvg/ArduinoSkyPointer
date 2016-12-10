@@ -72,6 +72,7 @@ class SkyPointer {
         void laser(uint8_t);        // Turn ON/OFF the laser
 	uint8_t isLaserOn(void);    // Check the laser state
         void setLaserTimeout(uint32_t);
+        void home();                // Find home position
         void move(int16_t az, int16_t alt);
         void goTo(uint16_t az, uint16_t alt);
         void getPos(uint16_t *az, uint16_t *alt);
@@ -81,9 +82,9 @@ class SkyPointer {
         uint32_t getTimeOn(void);   // Get elapsed ON time for laser
 
     private:
-        //uint8_t home;
         uint32_t laserOnTime;  // Elapsed ON time for laser
         uint32_t laserTimeout; // Laser timeout
+	bool homing;
         AccelStepper azMotor;
         AccelStepper altMotor;
 };

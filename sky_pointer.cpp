@@ -41,6 +41,7 @@ SkyPointer::SkyPointer(void) :
     azMotor(AccelStepper::DRIVER, XSTEP, XDIR),
     altMotor(AccelStepper::DRIVER, YSTEP, YDIR) {
     laserOnTime = 0;
+    homing = false;
     laserTimeout = LASER_TIMEOUT; // Default laser timeout
 }
 
@@ -85,6 +86,13 @@ void SkyPointer::laser(uint8_t enable) {
 
 uint8_t SkyPointer::isLaserOn(void) {
     return !digitalRead(LASER_PIN);
+}
+
+void SkyPointer::home() {
+    digitalWrite(ENABLE, LOW);
+    altMotor.setMaxSpeed(40);
+    altMotor.move(-1000);
+    homing = true;
 }
 
 void SkyPointer::move(int16_t az, int16_t alt) {
@@ -141,10 +149,16 @@ void SkyPointer::run() {
         if (millis() - laserOnTime > laserTimeout) {
             laser(false);
         }
-    } else {
+    } else if (!homing) {
         // Switch on the laser if the motors are running
         if (azMotor.isRunning() || (altMotor.isRunning())) {
             laser(true);
         }
+    }
+
+    if (homing && digitalRead(PHOTO_PIN)) {
+        altMotor.stop();
+        altMotor.setCurrentPosition(0);
+        homing = false;
     }
 }

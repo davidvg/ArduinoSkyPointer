@@ -35,7 +35,7 @@ void ProcessStop() {
 
 // Move the ALT motor to the home position
 void ProcessHome() {
-    // TODO
+    sp.home();
     Serial.print("OK\r");
 }
 
