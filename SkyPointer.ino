@@ -68,6 +68,13 @@ void ProcessLaser() {
     Serial.print("OK\r");
 }
 
+// Set the timeout of the laser pointer in ms
+void ProcessTimeout() {
+    int32_t t = atoi(sCmd.next());
+    sp.setLaserTimeout(t);
+    Serial.print("OK\r");
+}
+
 // Read a calibration value (4 bytes) from EEPROM
 void ProcessReadCalib () {
   uint8_t n = atoi(sCmd.next());
@@ -115,6 +122,7 @@ void setup() {
     sCmd.addCommand("I", ProcessId);      // I\r
     sCmd.addCommand("Q", ProcessQuit);    // Q\r
     sCmd.addCommand("L", ProcessLaser);   // L enable\r
+    sCmd.addCommand("T", ProcessTimeout);   // T XXXX\r
     sCmd.addCommand("R", ProcessReadCalib);  // R N\r
     sCmd.addCommand("W", ProcessWriteCalib); // W N XXXX\r
     sCmd.addDefaultHandler(Unrecognized);

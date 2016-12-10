@@ -4,7 +4,7 @@ Author:     David Vazquez Garcia    <davidvazquez.gijon@gmail.com>
 Version:    2.0
 Date:       2016/May/26
 
-This library is implemented for its use in the SkyPointer project:
+This code is part of the SkyPointer project:
     https://github.com/juanmb/skypointer
 
 *******************************************************************************/
@@ -16,11 +16,13 @@ This library is implemented for its use in the SkyPointer project:
 
 // Speed
 #ifdef DEBUG
-   #define MAX_SPEED 100
-    #define ACCEL 300
+#define GOTO_SPEED 100
+#define MOVE_SPEED 100
+#define ACCEL 300
 #else
-    #define MAX_SPEED 6000
-    #define ACCEL 4000
+#define GOTO_SPEED 6000
+#define MOVE_SPEED 200
+#define ACCEL 4000
 #endif
 
 // Naming the axes (ports)
@@ -53,8 +55,8 @@ This library is implemented for its use in the SkyPointer project:
 #define PHOTO_PIN ZSTEP
 // Pin for the laser -- Map to ZDIR
 #define LASER_PIN ZDIR
-// On time for laser
-#define LASER_ON_TIME  5000000 // 5 seconds
+// Default laser timeout
+#define LASER_TIMEOUT  5000 // 5 seconds
 // Baud Rate
 #define BAUDRATE 115200
 
@@ -66,8 +68,10 @@ class SkyPointer {
     public:
         SkyPointer(void);
         void init(void);            // Initialize the hardware
-        void run(void);
+        void run(void);             // Update the position of the motors
         void laser(uint8_t);        // Turn ON/OFF the laser
+	uint8_t isLaserOn(void);    // Check the laser state
+        void setLaserTimeout(uint32_t);
         void move(int16_t az, int16_t alt);
         void goTo(uint16_t az, uint16_t alt);
         void getPos(uint16_t *az, uint16_t *alt);
@@ -77,8 +81,9 @@ class SkyPointer {
         uint32_t getTimeOn(void);   // Get elapsed ON time for laser
 
     private:
-        uint8_t home;
-        uint32_t laserOnTime;       // Elapsed ON time for laser
+        //uint8_t home;
+        uint32_t laserOnTime;  // Elapsed ON time for laser
+        uint32_t laserTimeout; // Laser timeout
         AccelStepper azMotor;
         AccelStepper altMotor;
 };

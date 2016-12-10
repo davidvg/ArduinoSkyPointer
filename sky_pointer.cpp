@@ -40,8 +40,8 @@ int16_t calcSteps(uint16_t pos, uint16_t tgt) {
 SkyPointer::SkyPointer(void) :
     azMotor(AccelStepper::DRIVER, XSTEP, XDIR),
     altMotor(AccelStepper::DRIVER, YSTEP, YDIR) {
-    home = false;
     laserOnTime = 0;
+    laserTimeout = LASER_TIMEOUT; // Default laser timeout
 }
 
 void SkyPointer::init(void) {
@@ -53,42 +53,47 @@ void SkyPointer::init(void) {
     pinMode(XDIR, OUTPUT);
     pinMode(YSTEP, OUTPUT);
     pinMode(YDIR, OUTPUT);
-    // Laser pin
-    pinMode(LASER_PIN, OUTPUT);
     // Photo diode pin
     pinMode(PHOTO_PIN, INPUT);
+    // Laser pin
+    pinMode(LASER_PIN, OUTPUT);
+
     // Switch laser off at start
-    laser(0);
+    laser(false);
 
     // Configure axes logic and dinamics
     azMotor.setPinsInverted(false, false, true);
-    azMotor.setMaxSpeed(MAX_SPEED);
     azMotor.setAcceleration(ACCEL);
     azMotor.setEnablePin(ENABLE);
 
-    altMotor.setPinsInverted(false, false, true);
-    altMotor.setMaxSpeed(MAX_SPEED);
+    altMotor.setPinsInverted(true, false, true);
     altMotor.setAcceleration(ACCEL);
     altMotor.setEnablePin(ENABLE);
 }
 
-void SkyPointer::setTimeOn(uint32_t t) {
-    laserOnTime = t;
-}
-
-uint32_t SkyPointer::getTimeOn(void) {
-    return laserOnTime;
+void SkyPointer::setLaserTimeout(uint32_t t) {
+    laserTimeout = t;
 }
 
 void SkyPointer::laser(uint8_t enable) {
     // Inverted logic: 0 switches laser on, 1 switches it off
     digitalWrite(LASER_PIN, !enable);
+    if (enable) {
+        laserOnTime = millis();
+    }
+}
+
+uint8_t SkyPointer::isLaserOn(void) {
+    return !digitalRead(LASER_PIN);
 }
 
 void SkyPointer::move(int16_t az, int16_t alt) {
     digitalWrite(ENABLE, LOW);
+    azMotor.setMaxSpeed(MOVE_SPEED);
+    altMotor.setMaxSpeed(MOVE_SPEED);
     azMotor.move(az);
     altMotor.move(alt);
+    laser(true);
 }
 
 void SkyPointer::goTo(uint16_t az, uint16_t alt) {
@@ -96,6 +101,8 @@ void SkyPointer::goTo(uint16_t az, uint16_t alt) {
     uint16_t pos;
 
     digitalWrite(ENABLE, LOW);
+    azMotor.setMaxSpeed(GOTO_SPEED);
+    altMotor.setMaxSpeed(GOTO_SPEED);
 
     // AZ motor
     az = MOD(az, USTEPS_REV);
@@ -108,6 +115,7 @@ void SkyPointer::goTo(uint16_t az, uint16_t alt) {
     pos = MOD(altMotor.currentPosition(), USTEPS_REV);
     delta = calcSteps(pos, alt);
     altMotor.move(delta);
+    laser(true);
 }
 
 void SkyPointer::getPos(uint16_t *az, uint16_t *alt) {
@@ -127,4 +135,16 @@ void SkyPointer::releaseMotors() {
 void SkyPointer::run() {
     azMotor.run();
     altMotor.run();
+
+    if (isLaserOn()) {
+        // Switch off the laser if timeout has been reached
+        if (millis() - laserOnTime > laserTimeout) {
+            laser(false);
+        }
+    } else {
+        // Switch on the laser if the motors are running
+        if (azMotor.isRunning() || (altMotor.isRunning())) {
+            laser(true);
+        }
+    }
 }
