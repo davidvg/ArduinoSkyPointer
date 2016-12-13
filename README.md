@@ -1,77 +1,55 @@
-# SkyPointer MotorShield
-
-**Note on the version:** currently a v2 version of the library is on development. This new version uses a different motor driver and the code is not compatible with the one from v1. This new version allows faster rotations and accelerations that make the rotation smoother.
-
+# SkyPointer
 
 ## Description
-This library implements the functions and methods needed to control the stepper motors of the [SkyPointer](https://github.com/juanmb/skypointer) project with an [Adafruit MotorShield v2 shield](https://www.adafruit.com/products/1438).
 
-It's a variation of the [Adafruit library](https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library) for DC, servo and stepper motors, and it's strongly based on it.
+This project implements the functions and methods needed to control the stepper
+motors of the [SkyPointer](https://github.com/juanmb/skypointer) project with
+an Arduino UNO and a [CNC Shield](http://blog.protoneer.co.nz/arduino-cnc-shield/).
 
-The library focuses on stepper motors, and implements a slightly different method for microstepping. It uses 16 microsteps per step, but other values can be easily implemented.
+The Arduino controls two 200 steps/revolution stepper motors (azimuth and
+altitude) running at 16 microsteps per step. The azimuth motor is connected to
+the X driver, and the altitude motor is connected to the Y driver.
 
-As in the original Adafruit library, there is a `utility` folder, that includes some necessary code. It must be placed in the same folder than the `.cpp` and `.h` files for the library. In general, the code will be in the ```libraries``` folder of your Arduino installation.
+The Z-axis driver in the CNC shield is substituded with a custom board that
+controls a green laser pointer and a photodiode. The photodiode is used in the
+*homing* process for locating a reference angle of the altitude axis.
 
+The laser pointer can be enabled or disabled using the ZDIR pin of the CNC
+shield. The photodiode can be read through the ZSTEP pin.
 
+## Serial protocol
 
+The SkyPointer is controlled with a simple ASCII serial protocol.
 
-## How to use the library
-Here appears the code **specific to this library** to use it. Other necessary code is not shown.
+All the serial commands start with an uppercase letter and end with a carriage
+return `\r`. Some of them require one or two arguments, wich are separated by
+spaces.
 
-### Defining the elements
-
-First thing to do is to include the library in the Arduino sketch:
-```C++
-#include <SkyPointer_MotorShield.h>
-```
-
-Now we define a new `SkyPointer_MotorShield`, a shield object, and connect a 200 steps-per-revolution stepper motor to its port 1:
-```C++
-SkyPointer_MotorShield MS = SkyPointer_MotorShield();
-SkyPointer_MicroStepper *motor1 =MS.getMicroStepper(200, 1);
-```
-
-The library works with 16 microsteps per step.
-
-In ```setup()``` we start the shield using the `begin()` method, which internally configures the driver's pins and frequencies:
-
-```C++
-void setup () {
-	...
-	MS.begin();
-	...
-}
-```
+ * Id: `I\r`. Read the version string.
+ * Goto: `G XXXX YYYY\r`. Move both motors to an absolute position in microsteps.
+ * Move: ` M XXXX YYYY\r`. Move both motors a relative number of microsteps.
+ * GetPos: `P\r`. Get the position of the motors.
+ * Stop: ` S\r`. Stop both motors.
+ * Home: ` H\r`. Move the altitude axis until the photodiode is triggered.
+ * Quit: `Q\r`. Release both motors and switch the laser off.
+ * Laser: `L enable\r`. Enable or disable the laser.
+ * ReadCalib: `R N\r`. Read the calibration value (32 bit hex integer) at position
+   N (from 0 to 3).
+ * WriteCalib: `W N XXXX\r`. Write the calibration value at position N.
 
 
-### Making it work
+## Makefile
 
-We can set a target position calling the `setTarget()` method:
+The code can be compiled and uploaded to the Arduino using `make`.
+The provided Makefile requires [Arduino-Makefile](https://github.com/sudar/Arduino-Makefile)
+to work. In Debian/Ubuntu/Mint, you can install it with
 
-```C++
-motor -> setTarget(1000); // Set the motor to rotate to (absolute) microstep 1000
-```
+    sudo apt-get install arduino-mk
 
-The current target position can be retrieved calling the class member `motor.target`. Also, we can check if the target has been reached with the `motor -> isTarget()` method, which returns `true` if the rotation is done and the motor is at its final position.
+## Needed libraries
 
-The rotation is done calling the ```microstep()``` function:
-```C++
-void loop () {
-  motor1 -> microstep (1, FORWARD);
-  delay (200); // 200 ms delay for aprox. speed of 5 microsteps / second
-}
-```
+You will need the following third-party Arduino libraries before compiling this
+project:
 
-The rotation speed is controlled by calling the `microstep` member periodically. In this case, a ```delay()``` is used, but a better time control should be used. In the case of the SkyPointer project, speed temporization is done using the [Timer1](http://playground.arduino.cc/Code/Timer1) library after reading the target positions sent via Serial port using the [SerialCommand](https://github.com/scogswell/ArduinoSerialCommand) library.
-
-Due to the limitations of the shield, the maximum speed that can be achieved is quite slow.
-
-The current motor position can be accesed at any moment calling the `getPosition()` member:
-
-```C++
-curr_pos = motor -> getPosition();
-```
-
-### More features...
-
-The SkyPointer for which this library was written also has a laser that must be turned on and off. This can be done calling the `laser()` method, which takes as argument a `1` (`true`) to turn the laser on and a `0` (`false`) to turn it off. This can be used to handle any other hardware that meets the same specifications (more on this can be found in the code)
+ * [SerialCommand](https://github.com/scogswell/ArduinoSerialCommand)
+ * [AccelStepper](http://www.airspayce.com/mikem/arduino/AccelStepper)
