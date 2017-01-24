@@ -1,9 +1,1 @@
-/build*/**
-/commTest/**/build*/**
-*.*~
-*~
-*.cpp~
-*.h~
-*.swp
-*_OLD*
-*îno_
+Makefile
