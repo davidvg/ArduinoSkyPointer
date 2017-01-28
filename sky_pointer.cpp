@@ -105,24 +105,47 @@ void SkyPointer::move(int16_t az, int16_t alt) {
 }
 
 void SkyPointer::goTo(uint16_t az, uint16_t alt) {
-    int16_t delta;
+    int16_t delta_az, delta_alt;
     uint16_t pos;
+    float ratio;
 
     digitalWrite(ENABLE, LOW);
+    // This assumes that max speed is never reached by any motor in order to
+    // make a linear motion. For short rotations as the ones done here, it
+    // is true.
+    // If max speed was to be reached, the maximum speed for any motor should be
+    // scaled too by the ratio.
     azMotor.setMaxSpeed(GOTO_SPEED);
     altMotor.setMaxSpeed(GOTO_SPEED);
 
     // AZ motor
     az = MOD(az, USTEPS_REV);
     pos = MOD(azMotor.currentPosition(), USTEPS_REV);
-    delta = calcSteps(pos, az);
-    azMotor.move(delta);
+    delta_az = calcSteps(pos, az);
 
     // ALT motor
     alt = MOD(alt, USTEPS_REV);
     pos = MOD(altMotor.currentPosition(), USTEPS_REV);
-    delta = calcSteps(pos, alt);
-    altMotor.move(delta);
+    delta_alt = calcSteps(pos, alt);
+
+    // Assign different accelerations to make a linear motion by making both
+    // motors arrive at target at the same time. Speeds are kept proportional.
+    if ((delta_az != 0) && (delta_alt!=0)) {
+        if (abs(delta_az) >= abs(delta_alt)) {
+            ratio = (float)(abs(delta_alt)) / abs(delta_az); // ratio < 1
+            azMotor.setAcceleration(ACCEL);
+            altMotor.setAcceleration(ACCEL * ratio);
+        }
+        if (abs(delta_az) < abs(delta_alt)) {
+            ratio = (float)(abs(delta_az)) / abs(delta_alt); // ratio < 1
+            azMotor.setAcceleration(ACCEL * ratio);
+            altMotor.setAcceleration(ACCEL);
+        }
+    }
+
+    // Move the motors
+    azMotor.move(delta_az);
+    altMotor.move(delta_alt);
     laser(true);
 }
 
