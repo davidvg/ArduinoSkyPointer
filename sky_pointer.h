@@ -37,6 +37,10 @@ This code is part of the SkyPointer project:
 #define FW 0            // Forward
 #define BW 1            // Backward
 
+// Maximum rotation allowed
+#define MAX_TURNS 2
+#define MAX_RANGE (MAX_TURNS * USTEPS_REV) / 2      // Half the total range
+
 // CNC Shield pins
 #define XSTEP 2
 #define YSTEP 3
@@ -70,7 +74,7 @@ class SkyPointer {
         void init(void);            // Initialize the hardware
         void run(void);             // Update the position of the motors
         void laser(uint8_t);        // Turn ON/OFF the laser
-	uint8_t isLaserOn(void);    // Check the laser state
+        uint8_t isLaserOn(void);    // Check the laser state
         void setLaserTimeout(uint32_t);
         void home();                // Find home position
         void move(int16_t az, int16_t alt);
@@ -82,9 +86,10 @@ class SkyPointer {
         uint32_t getTimeOn(void);   // Get elapsed ON time for laser
 
     private:
-        uint32_t laserOnTime;  // Elapsed ON time for laser
-        uint32_t laserTimeout; // Laser timeout
-	bool homing;
+        uint32_t laserOnTime;       // Elapsed ON time for laser
+        uint32_t laserTimeout;      // Laser timeout
+        int16_t absPos;            // Absolute position for the AZ motor
+        bool homing;
         AccelStepper azMotor;
         AccelStepper altMotor;
 };
