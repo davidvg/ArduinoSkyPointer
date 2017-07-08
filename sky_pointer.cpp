@@ -16,7 +16,7 @@ int16_t calcSteps(uint16_t pos, uint16_t tgt) {
     uint16_t simPos;
     int16_t delta1, delta2;
 
-    // Obtain the simetric position
+    // Obtain the simmetric position
     simPos = MOD(pos + USTEPS_REV/2, USTEPS_REV);
     // Distance to go (positive / negative)
     delta1 = tgt - pos;
@@ -29,8 +29,8 @@ int16_t calcSteps(uint16_t pos, uint16_t tgt) {
     backward otherwhise.
     */
     if (pos < USTEPS_REV/2) {
-        // Transform delta to its (negative) simmetric.
-        return (delta2 < 0) ? delta1 - USTEPS_REV : delta1;
+	// Transform delta to its (negative) simmetric.
+	return (delta2 < 0) ? delta1 - USTEPS_REV : delta1;
     }
     // Transform delta to its (positive) simmetric.
     return (delta2 > 0) ? delta1 + USTEPS_REV : delta1;
@@ -40,7 +40,6 @@ int16_t calcSteps(uint16_t pos, uint16_t tgt) {
 SkyPointer::SkyPointer(void) :
     azMotor(AccelStepper::DRIVER, XSTEP, XDIR),
     altMotor(AccelStepper::DRIVER, YSTEP, YDIR) {
-    absPos = 0;
     laserOnTime = 0;
     homing = false;
     laserTimeout = LASER_TIMEOUT; // Default laser timeout
@@ -100,13 +99,6 @@ void SkyPointer::move(int16_t az, int16_t alt) {
     digitalWrite(ENABLE, LOW);
     azMotor.setMaxSpeed(MOVE_SPEED);
     altMotor.setMaxSpeed(MOVE_SPEED);
-    // Check movement is in the allowed range
-    int16_t aux = absPos + az;
-    if ((aux > MAX_RANGE) || (aux < -MAX_RANGE)) {
-        az = (az > 0) ? az - USTEPS_REV : az + USTEPS_REV;
-    }
-    absPos += az;  // Update absolute azimuth
-    Serial.println(az);
     azMotor.move(az);
     altMotor.move(alt);
     laser(true);
@@ -136,13 +128,6 @@ void SkyPointer::goTo(uint16_t az, uint16_t alt) {
     pos = MOD(altMotor.currentPosition(), USTEPS_REV);
     delta_alt = calcSteps(pos, alt);
 
-    // Check movement is in the allowed range and revert rotation direction
-    // if necessary
-    int16_t aux = absPos + delta_az;
-    if ((aux > MAX_RANGE) || (aux < -MAX_RANGE)) {
-        delta_az = (delta_az>0) ? delta_az - USTEPS_REV : delta_az + USTEPS_REV;
-    }
-
     // Assign different accelerations to make a linear motion by making both
     // motors arrive at target at the same time. Speeds are kept proportional.
     if ((delta_az != 0) && (delta_alt!=0)) {
@@ -158,9 +143,6 @@ void SkyPointer::goTo(uint16_t az, uint16_t alt) {
         }
     }
 
-    // Update absolute azimuth
-    absPos += delta_az;
-    Serial.println(az);
     // Move the motors
     azMotor.move(delta_az);
     altMotor.move(delta_alt);
