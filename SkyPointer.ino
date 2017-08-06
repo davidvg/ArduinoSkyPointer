@@ -2,6 +2,11 @@
 #include <EEPROM.h>
 #include "sky_pointer.h"
 
+#define VERSION "2.1"
+
+#if MAXSERIALCOMMANDS < 11
+#error "Please increase MAXSERIALCOMMANDS to 11 in SerialCommand library"
+#endif
 
 SkyPointer sp = SkyPointer();
 SerialCommand sCmd;
@@ -51,7 +56,7 @@ void ProcessGetPos() {
 
 // Get ID
 void ProcessId() {
-  Serial.print("SkyPointer 1.0\r");
+    Serial.print("SkyPointer v"VERSION"\r");
 }
 
 // Release both motors and shut down the laser
