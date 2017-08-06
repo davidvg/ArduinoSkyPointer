@@ -90,7 +90,7 @@ int16_t SkyPointer::calcAzDelta(uint16_t tgt) {
         }
     }
     absPos += res;
-    Serial.println(absPos);
+    //Serial.println(absPos);
     return res;
 }
 
