@@ -1,4 +1,3 @@
-
 # This Makefile is used to compile and upload the code to the Arduino via
 # Make, instead of using the IDE.
 #
@@ -13,4 +12,4 @@ ARDUINO_LIBS = SoftwareSerial EEPROM SerialCommand AccelStepper
 ARDUINO_LIBS += Wire
 ARDUINO_PORT = /dev/ttyACM0
 
-clude /usr/share/arduino/Arduino.mk
+include /usr/share/arduino/Arduino.mk

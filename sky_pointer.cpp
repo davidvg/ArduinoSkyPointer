@@ -51,7 +51,6 @@ SkyPointer::SkyPointer(void) :
 void SkyPointer::init(void) {
     // Enable pin
     pinMode(ENABLE, OUTPUT);
-    digitalWrite(ENABLE, LOW);
     // Configure outputs
     pinMode(XSTEP, OUTPUT);
     pinMode(XDIR, OUTPUT);
@@ -73,6 +72,7 @@ void SkyPointer::init(void) {
     altMotor.setPinsInverted(true, false, true);
     altMotor.setAcceleration(ACCEL);
     altMotor.setEnablePin(ENABLE);
+    digitalWrite(ENABLE, HIGH);
 }
 
 // Calculate the relative movement of a motor for going from 'pos' to 'tgt'
@@ -80,13 +80,13 @@ void SkyPointer::init(void) {
 int16_t SkyPointer::calcAzDelta(uint16_t tgt) {
     // Get the motor position
     uint16_t pos = MOD(azMotor.currentPosition(), USTEPS_REV);
-    // Calculate relative motion 
+    // Calculate relative motion
     int16_t res = calcSteps(pos, tgt);
     //Serial.println(res);
     // Check that absolute position is in range
     if (res != 0) {
         if (abs(absPos + res) > SEMIRANGE * USTEPS_REV) {
-            res = (res > 0) ? res - USTEPS_REV : res + USTEPS_REV; 
+            res = (res > 0) ? res - USTEPS_REV : res + USTEPS_REV;
         }
     }
     absPos += res;
@@ -97,7 +97,7 @@ int16_t SkyPointer::calcAzDelta(uint16_t tgt) {
 int16_t SkyPointer::calcAltDelta(uint16_t tgt) {
     // Get the motor position
     uint16_t pos = MOD(altMotor.currentPosition(), USTEPS_REV);
-    // Calculate relative motion 
+    // Calculate relative motion
     int16_t res = calcSteps(pos, tgt);
     return res;
 }

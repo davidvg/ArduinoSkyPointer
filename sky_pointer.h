@@ -37,7 +37,7 @@ This code is part of the SkyPointer project:
 #define FW 0            // Forward
 #define BW 1            // Backward
 // Maximum absolute rotation
-#define SEMIRANGE 1 // Turns allowed in each direction
+#define SEMIRANGE 0.7 // Turns allowed in each direction
 #define SEMIRANGE_USTEPS SEMIRANGE*USTEPS_REV
 
 // CNC Shield pins
