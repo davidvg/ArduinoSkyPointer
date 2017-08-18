@@ -8,6 +8,7 @@
 #error "Please increase MAXSERIALCOMMANDS to 11 in SerialCommand library"
 #endif
 
+
 SkyPointer sp = SkyPointer();
 SerialCommand sCmd;
 
@@ -16,10 +17,17 @@ SerialCommand sCmd;
 void ProcessGoto()
 {
     int16_t az, alt;
+    uint16_t speed;
+    char *ptr;
 
     az = atoi(sCmd.next());
     alt = atoi(sCmd.next());
-    sp.goTo(az, alt);
+    ptr = sCmd.next();
+    if (ptr)
+        speed = atoi(ptr);
+    else
+        speed = GOTO_SPEED;
+    sp.goTo(az, alt, speed);
     Serial.print("OK\r");
 }
 
@@ -27,10 +35,17 @@ void ProcessGoto()
 void ProcessMove()
 {
     int16_t az, alt;
+    uint16_t speed;
+    char *ptr;
 
     az = atoi(sCmd.next());
     alt = atoi(sCmd.next());
-    sp.move(az, alt);
+    ptr = sCmd.next();
+    if (ptr)
+        speed = atoi(ptr);
+    else
+        speed = MOVE_SPEED;
+    sp.move(az, alt, speed);
     Serial.print("OK\r");
 }
 

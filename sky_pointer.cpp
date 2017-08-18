@@ -133,17 +133,24 @@ void SkyPointer::home()
     _state = ST_HOMING_FW;
 }
 
-void SkyPointer::move(int16_t az, int16_t alt)
+void SkyPointer::move(int16_t az, int16_t alt, uint16_t speed)
 {
     digitalWrite(ENABLE, LOW);
-    azMotor.setMaxSpeed(MOVE_SPEED);
-    altMotor.setMaxSpeed(MOVE_SPEED);
+    azMotor.setMaxSpeed(speed);
+    altMotor.setMaxSpeed(speed);
+
+    // limit altitude range
+    int16_t curr;
+    curr = altMotor.currentPosition();
+    alt = (curr + alt > USTEPS_REV / 4) ? (USTEPS_REV / 4 - curr) : alt;
+    alt = (curr + alt < 0) ? -curr : alt;
+
     azMotor.move(az);
     altMotor.move(alt);
     laser(true);
 }
 
-void SkyPointer::goTo(uint16_t az, uint16_t alt)
+void SkyPointer::goTo(uint16_t az, uint16_t alt, uint16_t speed)
 {
     int16_t delta_az, delta_alt;
     float ratio;
@@ -154,8 +161,8 @@ void SkyPointer::goTo(uint16_t az, uint16_t alt)
     // is true.
     // If max speed was to be reached, the maximum speed for any motor should be
     // scaled too by the ratio.
-    azMotor.setMaxSpeed(GOTO_SPEED);
-    altMotor.setMaxSpeed(GOTO_SPEED);
+    azMotor.setMaxSpeed(speed);
+    altMotor.setMaxSpeed(speed);
 
     // AZ motor
     az = MOD(az, USTEPS_REV);

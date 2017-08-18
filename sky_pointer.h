@@ -89,8 +89,8 @@ public:
     uint8_t isLaserOn(void);    // Check the laser state
     void setLaserTimeout(uint32_t);
     void home();                // Find home position
-    void move(int16_t az, int16_t alt);
-    void goTo(uint16_t az, uint16_t alt);
+    void move(int16_t az, int16_t alt, uint16_t speed);
+    void goTo(uint16_t az, uint16_t alt, uint16_t speed);
     void getPos(uint16_t *az, uint16_t *alt);
     void stop();                // Stop both motors
     void releaseMotors();       // Disable the motor drivers
