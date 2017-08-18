@@ -13,7 +13,8 @@ SerialCommand sCmd;
 
 
 // Move both motors to an absolute position
-void ProcessGoto() {
+void ProcessGoto()
+{
     int16_t az, alt;
 
     az = atoi(sCmd.next());
@@ -23,7 +24,8 @@ void ProcessGoto() {
 }
 
 // Move both motors to a relative position
-void ProcessMove() {
+void ProcessMove()
+{
     int16_t az, alt;
 
     az = atoi(sCmd.next());
@@ -33,19 +35,22 @@ void ProcessMove() {
 }
 
 // Stop the motors
-void ProcessStop() {
+void ProcessStop()
+{
     sp.stop();
     Serial.print("OK\r");
 }
 
 // Move the ALT motor to the home position
-void ProcessHome() {
+void ProcessHome()
+{
     sp.home();
     Serial.print("OK\r");
 }
 
 // Get the current position of the motors
-void ProcessGetPos() {
+void ProcessGetPos()
+{
     char buff[13];
     uint16_t az, alt;
 
@@ -55,66 +60,74 @@ void ProcessGetPos() {
 }
 
 // Get ID
-void ProcessId() {
+void ProcessId()
+{
     Serial.print("SkyPointer v"VERSION"\r");
 }
 
 // Release both motors and shut down the laser
-void ProcessQuit() {
+void ProcessQuit()
+{
     sp.laser(0);
     sp.releaseMotors();
     Serial.print("OK\r");
 }
 
 // Enable or disable the laser
-void ProcessLaser() {
+void ProcessLaser()
+{
     uint8_t enable = atoi(sCmd.next()) != 0;
     sp.laser(enable);
     Serial.print("OK\r");
 }
 
 // Set the timeout of the laser pointer in ms
-void ProcessTimeout() {
+void ProcessTimeout()
+{
     int32_t t = atoi(sCmd.next());
     sp.setLaserTimeout(t);
     Serial.print("OK\r");
 }
 
 // Read a calibration value (4 bytes) from EEPROM
-void ProcessReadCalib () {
-  uint8_t n = atoi(sCmd.next());
-  if (n > 3) {
-      Serial.print("NK\r");
-      return;
-  }
-  char buf[12], data[4];
-  for (int i = 0; i < 4; i++) {
-    data[i] = EEPROM.read(4*n + i);
-  }
-  sprintf(buf, "R %08lx\r", *(uint32_t *)data);
-  Serial.print(buf);
+void ProcessReadCalib ()
+{
+    uint8_t n = atoi(sCmd.next());
+    if (n > 3) {
+        Serial.print("NK\r");
+        return;
+    }
+    char buf[12], data[4];
+    for (int i = 0; i < 4; i++) {
+        data[i] = EEPROM.read(4 * n + i);
+    }
+    sprintf(buf, "R %08lx\r", *(uint32_t *)data);
+    Serial.print(buf);
 }
 
 // Write a calibration value (4 bytes) to EEPROM
-void ProcessWriteCalib () {
-  uint8_t n = atoi(sCmd.next());
-  if (n > 3) {
-      Serial.print("NK\r");
-      return;
-  }
-  char data[4];
-  sscanf(sCmd.next(), "%lx", (uint32_t *)data);
-  for (int i = 0; i < 4; i++) {
-    EEPROM.write(4*n + i, data[i]);
-  }
-  Serial.print("OK\r");
+void ProcessWriteCalib ()
+{
+    uint8_t n = atoi(sCmd.next());
+    if (n > 3) {
+        Serial.print("NK\r");
+        return;
+    }
+    char data[4];
+    sscanf(sCmd.next(), "%lx", (uint32_t *)data);
+    for (int i = 0; i < 4; i++) {
+        EEPROM.write(4 * n + i, data[i]);
+    }
+    Serial.print("OK\r");
 }
 
-void Unrecognized() {
+void Unrecognized()
+{
     Serial.print("NK\r");
 }
 
-void setup() {
+void setup()
+{
     // Configure the SkyPointer hardware
     sp.init();
 
@@ -135,7 +148,8 @@ void setup() {
     Serial.begin(BAUDRATE);
 }
 
-void loop() {
+void loop()
+{
     sCmd.readSerial();
     sp.run();
 }
